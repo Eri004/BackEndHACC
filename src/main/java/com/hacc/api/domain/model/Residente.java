@@ -41,6 +41,12 @@ public class Residente {
     @Column(name = "res_estado")
     String estado;
 
+    @Column(name = "res_email")
+    String email;
+
+    @Column(name = "res_contrasena")
+    String contrasena;
+    
     public Integer getId_residente() {
         return id_residente;
     }
@@ -116,7 +122,24 @@ public class Residente {
                 ", ultimoPago=" + ultimoPago +
                 ", deuda=" + deuda +
                 ", estado='" + estado + '\'' +
+                ", email='" + email + '\'' +
                 '}';
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
     }
 
 }
