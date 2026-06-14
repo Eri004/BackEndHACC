@@ -9,24 +9,14 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
-
 @Provider
 @PreMatching
 public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-
-        if (requestContext.getMethod().equalsIgnoreCase("OPTIONS")) {
-
-            Response response = Response.ok()
-                    .header("Access-Control-Allow-Origin", "http://localhost:5173")
-                    .header("Access-Control-Allow-Credentials", "true")
-                    .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-                    .build();
-
-            requestContext.abortWith(response);
+        if ("OPTIONS".equalsIgnoreCase(requestContext.getMethod())) {
+            requestContext.abortWith(Response.ok().build());
         }
     }
 
@@ -34,9 +24,24 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext requestContext,
                        ContainerResponseContext responseContext) {
 
-        responseContext.getHeaders().add("Access-Control-Allow-Origin", "http://localhost:5173");
-        responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
-        responseContext.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
-        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        responseContext.getHeaders().putSingle(
+                "Access-Control-Allow-Origin",
+                "http://localhost:5173"
+        );
+
+        responseContext.getHeaders().putSingle(
+                "Access-Control-Allow-Credentials",
+                "true"
+        );
+
+        responseContext.getHeaders().putSingle(
+                "Access-Control-Allow-Headers",
+                "origin, content-type, accept, authorization"
+        );
+
+        responseContext.getHeaders().putSingle(
+                "Access-Control-Allow-Methods",
+                "GET, POST, PUT, DELETE, OPTIONS"
+        );
     }
 }
