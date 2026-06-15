@@ -16,7 +16,13 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         if ("OPTIONS".equalsIgnoreCase(requestContext.getMethod())) {
-            requestContext.abortWith(Response.ok().build());
+            requestContext.abortWith(
+                jakarta.ws.rs.core.Response.ok()
+                    .header("Access-Control-Allow-Origin", "https://front-end-hacc.vercel.app")
+                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                    .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                    .build()
+            );
         }
     }
 
@@ -25,8 +31,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
                        ContainerResponseContext responseContext) {
 
         responseContext.getHeaders().putSingle(
-                "Access-Control-Allow-Origin",
-                "http://localhost:5173"
+            "Access-Control-Allow-Origin", 
+            "https://front-end-hacc.vercel.app"
         );
 
         responseContext.getHeaders().putSingle(
