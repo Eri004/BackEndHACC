@@ -19,13 +19,17 @@ public class AuthService {
         public String apellido;
         public String rol;
         public String email;
+        public String telefono;
+        public String cedula;
         
-        public AuthResponse(Integer id, String nombre, String apellido, String rol, String email) {
+        public AuthResponse(Integer id, String nombre, String apellido, String rol, String email, String telefono, String cedula) {
             this.id = id;
             this.nombre = nombre;
             this.apellido = apellido;
             this.rol = rol;
             this.email = email;
+            this.telefono=telefono;
+            this.cedula=cedula;
         }
     }
     
@@ -45,7 +49,9 @@ public class AuthService {
                 propietario.getNombre(),
                 propietario.getApellido(),
                 "propietario",
-                propietario.getEmail()
+                propietario.getEmail(),
+                propietario.getTelefono(),
+                propietario.getCedula()
             );
             
         } catch (NoResultException e1) {
@@ -66,7 +72,9 @@ public class AuthService {
                     residente.getNombre(),
                     residente.getApellido(),
                     "residente",
-                    residente.getEmail()
+                    residente.getEmail(),
+                    residente.getTelefono(),
+                    residente.getCedula()
                 );
                 
             } catch (NoResultException e2) {

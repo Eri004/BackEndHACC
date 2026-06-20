@@ -30,7 +30,7 @@ public class Residente {
     String departamento;
 
     @Column(name = "res_telefono")
-    Long telefono;
+    String telefono;
 
     @Column(name = "res_ultimo_pago")   
     LocalDate ultimoPago;
@@ -46,6 +46,9 @@ public class Residente {
 
     @Column(name = "res_contrasena")
     String contrasena;
+
+    @Column(name = "res_cedula")
+    String cedula;
     
     public Integer getId_residente() {
         return id_residente;
@@ -79,11 +82,11 @@ public class Residente {
         this.departamento = departamento;
     }
 
-    public Long getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(Long telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 
@@ -110,6 +113,7 @@ public class Residente {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
 
     @Override
     public String toString() {
@@ -141,5 +145,15 @@ public class Residente {
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
+
+
+    public String getCedula() {
+        return cedula;
+    }
+
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
+    }
+    
 
 }

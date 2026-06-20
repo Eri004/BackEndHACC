@@ -23,9 +23,11 @@ public class Propietario {
     @Column(name = "prop_email")
     private String email;
     @Column(name = "prop_telefono")
-    private Long telefono;
+    private String telefono;
     @Column(name = "prop_contrasena", nullable = false)
     private String contrasena;
+    @Column(name = "prop_cedula", nullable = false)
+    private String cedula;
     public Integer getId_propietario() {
         return id_propietario;
     }
@@ -50,21 +52,34 @@ public class Propietario {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Long getTelefono() {
-        return telefono;
-    }
-    public void setTelefono(Long telefono) {
-        this.telefono = telefono;
-    }
+    
     public String getContrasena() {
         return contrasena;
     }
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
+
+    
     @Override
     public String toString() {
         return "Propietario [id_propietario=" + id_propietario + ", nombre=" + nombre + ", apellido=" + apellido
                 + ", email=" + email + ", telefono=" + telefono + "]";
+    }
+
+    public String getCedula() {
+        return cedula;
+    }
+
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 }
