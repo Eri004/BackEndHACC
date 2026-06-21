@@ -1,12 +1,15 @@
 package com.hacc.api.domain.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -49,6 +52,9 @@ public class Residente {
 
     @Column(name = "res_cedula")
     String cedula;
+
+    @OneToMany(mappedBy = "residente",cascade=CascadeType.ALL)
+    List <Pago> pagos;
     
     public Integer getId_residente() {
         return id_residente;
@@ -114,22 +120,13 @@ public class Residente {
         this.estado = estado;
     }
 
-
-    @Override
-    public String toString() {
-        return "Residente{" +
-                "id_residente=" + id_residente +
-                ", nombre='" + nombre + '\'' +
-                ", apellido='" + apellido + '\'' +
-                ", departamento='" + departamento + '\'' +
-                ", telefono=" + telefono +
-                ", ultimoPago=" + ultimoPago +
-                ", deuda=" + deuda +
-                ", estado='" + estado + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    public List<Pago> getPagos() {
+        return pagos;
     }
-
+    public void setPagos(List<Pago> pagos) {
+        this.pagos = pagos;
+    }
+    
     public String getEmail() {
         return email;
     }
@@ -154,6 +151,23 @@ public class Residente {
     public void setCedula(String cedula) {
         this.cedula = cedula;
     }
+
+
+    @Override
+    public String toString() {
+        return "Residente{" +
+                "id_residente=" + id_residente +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", departamento='" + departamento + '\'' +
+                ", telefono=" + telefono +
+                ", ultimoPago=" + ultimoPago +
+                ", deuda=" + deuda +
+                ", estado='" + estado + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
     
 
 }
