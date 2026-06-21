@@ -10,6 +10,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -34,6 +36,10 @@ public class Edificio {
 
     @Column(name = "edi_activo")
     private Boolean activo = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_propietario", nullable = false)
+    private Propietario propietario;
     
     @OneToMany(mappedBy = "edificio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Unidad> unidades = new HashSet<>();
@@ -90,4 +96,13 @@ public class Edificio {
     public void setUnidades(Set<Unidad> unidades) {
         this.unidades = unidades;
     }
+
+    public Propietario getPropietario() {
+        return propietario;
+    }
+
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
+    }
+    
 }
