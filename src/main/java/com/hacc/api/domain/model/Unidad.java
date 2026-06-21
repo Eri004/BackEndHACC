@@ -1,10 +1,20 @@
 package com.hacc.api.domain.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 
 public class Unidad {
@@ -26,6 +36,86 @@ public class Unidad {
     @Column(name = "estado")
     @Enumerated(EnumType.STRING)
     private EstadoUnidad estado = EstadoUnidad.DISPONIBLE;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "edificio_id", nullable = false)
+    private Edificio edificio;
+    
+    @ManyToMany(mappedBy = "unidades")
+    private Set<Propietario> propietarios = new HashSet<>();
+
+    @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Residente> residentes = new HashSet<>();
+
+    public String getIdentificadorCompleto() {
+        return edificio != null ? edificio.getNombre() + " - " + numero : numero;
+    }
+
+    public Long getIdUnidad() {
+        return idUnidad;
+    }
+
+    public void setIdUnidad(Long idUnidad) {
+        this.idUnidad = idUnidad;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public Integer getPiso() {
+        return piso;
+    }
+
+    public void setPiso(Integer piso) {
+        this.piso = piso;
+    }
+
+    public Double getArea() {
+        return area;
+    }
+
+    public void setArea(Double area) {
+        this.area = area;
+    }
+
+    public EstadoUnidad getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoUnidad estado) {
+        this.estado = estado;
+    }
+
+    public Edificio getEdificio() {
+        return edificio;
+    }
+
+    public void setEdificio(Edificio edificio) {
+        this.edificio = edificio;
+    }
+
+    public Set<Propietario> getPropietarios() {
+        return propietarios;
+    }
+
+    public void setPropietarios(Set<Propietario> propietarios) {
+        this.propietarios = propietarios;
+    }
+
+    public Set<Residente> getResidentes() {
+        return residentes;
+    }
+
+    public void setResidentes(Set<Residente> residentes) {
+        this.residentes = residentes;
+    }
+
+    
 }
 
 enum EstadoUnidad {
