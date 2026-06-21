@@ -10,4 +10,6 @@ public interface IPropietarioRepo {
     public void actualizarPropietario(Propietario propietario);
     public void eliminarPropietario(Integer id_propietario);
     public List<Propietario> listarPropietarios();
+    public boolean existePorEmail(String email);
+    public boolean existePorCedula(String cedula);
 }

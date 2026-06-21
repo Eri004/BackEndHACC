@@ -11,6 +11,25 @@ public class PropietarioService {
     @Inject
     private IPropietarioRepo propietarioRepo;
     
+     public Propietario registrarPropietario(Propietario dto) {
+        if (propietarioRepo.existePorEmail(dto.getEmail())) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+        if (propietarioRepo.existePorCedula(dto.getCedula())) {
+            throw new RuntimeException("La cédula ya está registrada");
+        }
+        
+        Propietario propietario = new Propietario();
+        propietario.setNombre(dto.getNombre());
+        propietario.setApellido(dto.getApellido());
+        propietario.setEmail(dto.getEmail());
+        propietario.setTelefono(dto.getTelefono());
+        propietario.setCedula(dto.getCedula());
+        propietario.setContrasena(dto.getContrasena());
+        propietarioRepo.crearPropietario(propietario);
+        return propietario;
+    }
+    
     public void crear(Propietario propietario) {
         propietarioRepo.crearPropietario(propietario);
     }
@@ -19,20 +38,31 @@ public class PropietarioService {
         return propietarioRepo.obtenerPropietario(id_propietario);
     }
 
-    public void actualizar(Integer id_propietario, Propietario propietario) {
+     public void actualizar(Integer id_propietario, Propietario dto) {
         Propietario propietarioExistente = propietarioRepo.obtenerPropietario(id_propietario);
-        propietarioExistente.setNombre(propietario.getNombre());
-        propietarioExistente.setApellido(propietario.getApellido());
-        propietarioExistente.setTelefono(propietario.getTelefono());
-        propietarioExistente.setEmail(propietario.getEmail());
-        propietarioExistente.setContrasena(propietario.getContrasena());
+        if (propietarioExistente == null) {
+            throw new RuntimeException("Propietario no encontrado");
+        }
+        propietarioExistente.setNombre(dto.getNombre());
+        propietarioExistente.setApellido(dto.getApellido());
+        propietarioExistente.setTelefono(dto.getTelefono());
+        propietarioExistente.setEmail(dto.getEmail());
+        if (dto.getContrasena() != null && !dto.getContrasena().isEmpty()) {
+            propietarioExistente.setContrasena(dto.getContrasena());
+        }
+        
         propietarioRepo.actualizarPropietario(propietarioExistente);
     }
 
+
     public void eliminar(Integer id_propietario) {
+        Propietario propietario = propietarioRepo.obtenerPropietario(id_propietario);
+        if (propietario == null) {
+            throw new RuntimeException("Propietario no encontrado");
+        }
         propietarioRepo.eliminarPropietario(id_propietario);
     }
-
+    
     public java.util.List<Propietario> listar() {
         return propietarioRepo.listarPropietarios();
     }
