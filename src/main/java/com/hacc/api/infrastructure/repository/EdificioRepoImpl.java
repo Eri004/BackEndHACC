@@ -62,7 +62,7 @@ public class EdificioRepoImpl implements IEdificioRepo {
     @Override
     public boolean existePorNombre(String nombre, Integer propietarioId) {
         TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(e) FROM Edificio e WHERE e.nombre = :nombre AND e.propietario.idPropietario = :propietarioId",
+            "SELECT COUNT(e) FROM Edificio e WHERE e.nombre = :nombre AND e.propietario.id = :propietarioId",
             Long.class
         );
         query.setParameter("nombre", nombre);
