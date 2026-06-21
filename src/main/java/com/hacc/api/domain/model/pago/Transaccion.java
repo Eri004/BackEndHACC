@@ -1,5 +1,5 @@
 package com.hacc.api.domain.model.pago;
 
-public class Transcaccion {
+public class Transaccion {
 
 }

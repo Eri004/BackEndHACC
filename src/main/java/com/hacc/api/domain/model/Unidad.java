@@ -5,6 +5,7 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -16,7 +17,10 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "unidad")
 public class Unidad {
     @Id
     @SequenceGenerator(name = "unidad_seq", sequenceName = "unidad_seq", allocationSize = 1)
@@ -24,25 +28,26 @@ public class Unidad {
     @Column(name = "id_unidad")
     private Long idUnidad;
 
-    @Column(name = "numero", nullable = false, length = 10)
+    @Column(name = "uni_numero", nullable = false, length = 10)
     private String numero;
 
-    @Column(name = "piso")
+    @Column(name = "uni_piso")
     private Integer piso;
 
-    @Column(name = "area")
+    @Column(name = "uni_area")
     private Double area;
 
-    @Column(name = "estado")
+    @Column(name = "uni_estado")
     @Enumerated(EnumType.STRING)
     private EstadoUnidad estado = EstadoUnidad.DISPONIBLE;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "edificio_id", nullable = false)
+    @JoinColumn(name = "id_edificio", nullable = false)
     private Edificio edificio;
     
-    @ManyToMany(mappedBy = "unidades")
-    private Set<Propietario> propietarios = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_propietario")
+    private Propietario propietario;
 
     @OneToMany(mappedBy = "unidad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Residente> residentes = new HashSet<>();
@@ -99,12 +104,12 @@ public class Unidad {
         this.edificio = edificio;
     }
 
-    public Set<Propietario> getPropietarios() {
-        return propietarios;
+    public Propietario getPropietario() {
+        return propietario;
     }
 
-    public void setPropietarios(Set<Propietario> propietarios) {
-        this.propietarios = propietarios;
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
     }
 
     public Set<Residente> getResidentes() {

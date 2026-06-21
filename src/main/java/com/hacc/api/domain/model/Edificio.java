@@ -5,13 +5,17 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "edificio")
 public class Edificio {
     @Id
     @SequenceGenerator(name = "edificio_seq", sequenceName = "edificio_seq", allocationSize = 1)
@@ -25,10 +29,10 @@ public class Edificio {
     @Column(name = "edi_direccion", length = 200)
     private String direccion;
 
-    @Column(name = "total_unidades")
+    @Column(name = "edi_total_unidades")
     private Integer totalUnidades;
 
-    @Column(name = "activo")
+    @Column(name = "edi_activo")
     private Boolean activo = true;
     
     @OneToMany(mappedBy = "edificio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -1,10 +1,15 @@
 package com.hacc.api.domain.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -28,6 +33,10 @@ public class Propietario {
     private String contrasena;
     @Column(name = "prop_cedula", nullable = false)
     private String cedula;
+
+    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
+    private List<Unidad> unidades = new ArrayList<>();
+    
     public Integer getId_propietario() {
         return id_propietario;
     }
