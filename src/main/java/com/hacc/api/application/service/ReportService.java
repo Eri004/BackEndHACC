@@ -6,7 +6,7 @@ import java.util.List;
 import com.hacc.api.domain.model.Pago;
 import com.hacc.api.domain.repository.IPagoRepo;
 import com.hacc.api.generator.ExcelGenerator;
-import com.hacc.api.request.PdfGenerator;
+import com.hacc.api.generator.PdfGenerator;
 import com.hacc.api.request.ReportRequest;
 
 import jakarta.enterprise.context.ApplicationScoped;
