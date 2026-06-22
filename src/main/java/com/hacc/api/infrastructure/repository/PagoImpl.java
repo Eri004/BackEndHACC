@@ -1,5 +1,6 @@
 package com.hacc.api.infrastructure.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.hacc.api.domain.model.Pago;
@@ -51,6 +52,20 @@ public class PagoImpl implements IPagoRepo {
     public List<Pago> listarPagosPorResidente(Integer idResidente) {
         TypedQuery<Pago> query = this.em.createQuery("SELECT p FROM Pago p WHERE p.idResidente = :idResidente", Pago.class);
         query.setParameter("idResidente", idResidente);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Pago> findByPeriodo(LocalDate start, LocalDate end) {
+
+        TypedQuery<Pago> query = em.createQuery(
+                "SELECT p FROM Pago p WHERE p.fecha BETWEEN :start AND :end",
+                Pago.class
+        );
+
+        query.setParameter("start", start);
+        query.setParameter("end", end);
+
         return query.getResultList();
     }
 }

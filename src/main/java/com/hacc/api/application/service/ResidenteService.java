@@ -14,8 +14,8 @@ public class ResidenteService {
     @Inject
     IResidenteRepo residenteRepo;
 
-    public void crear(Residente residente) {
-        residenteRepo.crearResidente(residente);
+    public Residente crear(Residente residente) {
+        return residenteRepo.crearResidente(residente);
     }
 
     public Residente obtener(Integer id_residente) {

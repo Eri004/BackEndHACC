@@ -1,5 +1,6 @@
 package com.hacc.api.domain.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.hacc.api.domain.model.Pago;
@@ -11,4 +12,7 @@ public interface IPagoRepo {
     public void eliminarPago(Integer id_pago);
     public List<Pago> listarPagos();
     public List<Pago> listarPagosPorResidente(Integer idResidente);
+
+
+    public List<Pago> findByPeriodo(LocalDate start, LocalDate end);
 }

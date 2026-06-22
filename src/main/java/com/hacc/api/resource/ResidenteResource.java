@@ -15,6 +15,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 
 @Path("/residentes")
@@ -32,9 +33,13 @@ public class ResidenteResource {
     }
 
     @POST
-    public void crearResidente(Residente residente) {
-        residenteService.crear(residente);
-    }
+public Response crearResidente(Residente residente) {
+    Residente creado = residenteService.crear(residente);
+
+    return Response.status(Response.Status.CREATED)
+            .entity(creado)
+            .build();
+}
 
     @DELETE
     @Path("/{id_residente}")

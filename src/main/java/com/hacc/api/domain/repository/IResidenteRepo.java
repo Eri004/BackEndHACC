@@ -6,7 +6,7 @@ import com.hacc.api.domain.model.Residente;
 
 public interface IResidenteRepo {
 
-    public void crearResidente(Residente residente);
+    public Residente crearResidente(Residente residente);
     public Residente obtenerResidente(Integer id_residente);
     public void actualizarResidente(Residente residente);
     public void eliminarResidente(Integer id_residente);

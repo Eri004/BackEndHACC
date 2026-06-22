@@ -20,8 +20,9 @@ public class ResidenteImpl implements IResidenteRepo {
 
 
     @Override
-    public void crearResidente(Residente residente) {
+    public Residente crearResidente(Residente residente) {
         this.em.persist(residente);
+        return residente;
     }
 
     @Override
