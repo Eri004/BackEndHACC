@@ -10,6 +10,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -56,6 +58,11 @@ public class Residente {
 
     @OneToMany(mappedBy = "residente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<Pago> pagos;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_unidad")
+    private Unidad unidad;
+    
     
     public Integer getId_residente() {
         return id_residente;
@@ -153,22 +160,11 @@ public class Residente {
         this.cedula = cedula;
     }
 
-
-    @Override
-    public String toString() {
-        return "Residente{" +
-                "id_residente=" + id_residente +
-                ", nombre='" + nombre + '\'' +
-                ", apellido='" + apellido + '\'' +
-                ", departamento='" + departamento + '\'' +
-                ", telefono=" + telefono +
-                ", ultimoPago=" + ultimoPago +
-                ", deuda=" + deuda +
-                ", estado='" + estado + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    public Unidad getUnidad() {
+        return unidad;
     }
-
     
-
+    public void setUnidad(Unidad unidad) {
+        this.unidad = unidad;
+    }
 }

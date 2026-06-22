@@ -8,6 +8,7 @@ import com.hacc.api.domain.repository.IPropietarioRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
@@ -44,4 +45,23 @@ public class PropietarioImpl implements IPropietarioRepo{
         return this.em.find(Propietario.class, id_propietario);
     }
 
+    @Override
+    public boolean existePorEmail(String email) {
+        TypedQuery<Long> query = em.createQuery(
+            "SELECT COUNT(p) FROM Propietario p WHERE p.email = :email", Long.class
+        );
+        query.setParameter("email", email);
+        Long count = query.getSingleResult();
+        return count > 0;
+    }
+
+    @Override
+    public boolean existePorCedula(String cedula) {
+        TypedQuery<Long> query = em.createQuery(
+            "SELECT COUNT(p) FROM Propietario p WHERE p.cedula = :cedula", Long.class
+        );
+        query.setParameter("cedula", cedula);
+        Long count = query.getSingleResult();
+        return count > 0;
+    }
 }
