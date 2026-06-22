@@ -82,7 +82,7 @@ public class EdificioService {
         }
 
         if (!edificioExistente.getNombre().equals(edificioActualizado.getNombre()) &&
-            edificioRepo.existePorNombre((Long) edificioActualizado.getNombre(), 
+            edificioRepo.existePorNombre(edificioActualizado.getNombre(), 
                                         edificioExistente.getPropietario().getId_propietario())) {
             throw new RuntimeException("Ya existe otro edificio con el nombre '" + 
                                      edificioActualizado.getNombre() + "'");

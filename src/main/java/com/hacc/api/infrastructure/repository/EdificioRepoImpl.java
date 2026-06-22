@@ -52,7 +52,7 @@ public class EdificioRepoImpl implements IEdificioRepo {
     @Override
     public List<Edificio> listarEdificiosPorPropietario(Integer propietarioId) {
         TypedQuery<Edificio> query = entityManager.createQuery(
-            "SELECT e FROM Edificio e WHERE e.propietario.idPropietario = :propietarioId ORDER BY e.nombre",
+            "SELECT e FROM Edificio e WHERE e.propietario.id_propietario = :propietarioId ORDER BY e.nombre",
             Edificio.class
         );
         query.setParameter("propietarioId", propietarioId);
@@ -62,7 +62,7 @@ public class EdificioRepoImpl implements IEdificioRepo {
     @Override
     public boolean existePorNombre(String nombre, Integer propietarioId) {
         TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(e) FROM Edificio e WHERE e.nombre = :nombre AND e.propietario.id = :propietarioId",
+            "SELECT COUNT(e) FROM Edificio e WHERE e.nombre = :nombre AND e.propietario.id_propietario = :propietarioId",
             Long.class
         );
         query.setParameter("nombre", nombre);
