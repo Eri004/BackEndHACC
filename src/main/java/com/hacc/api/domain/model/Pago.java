@@ -2,6 +2,7 @@ package com.hacc.api.domain.model;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +35,7 @@ public class Pago {
     @Column(name = "pag_fecha")
     private LocalDate fecha;
     
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_residente", insertable = false, updatable = false)
     private Residente residente;

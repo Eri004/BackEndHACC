@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -53,8 +54,8 @@ public class Residente {
     @Column(name = "res_cedula")
     String cedula;
 
-    @OneToMany(mappedBy = "residente",cascade=CascadeType.ALL)
-    List <Pago> pagos;
+    @OneToMany(mappedBy = "residente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<Pago> pagos;
     
     public Integer getId_residente() {
         return id_residente;
