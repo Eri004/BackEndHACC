@@ -56,6 +56,9 @@ public class Residente {
     @Column(name = "res_cedula")
     String cedula;
 
+    @Column(name = "res_cuota_mensual")
+    Double cuotaMensual;
+
     @OneToMany(mappedBy = "residente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<Pago> pagos;
     
@@ -166,5 +169,13 @@ public class Residente {
     
     public void setUnidad(Unidad unidad) {
         this.unidad = unidad;
+    }
+
+    public Double getCuotaMensual() {
+        return cuotaMensual;
+    }
+
+    public void setCuotaMensual(Double cuotaMensual) {
+        this.cuotaMensual = cuotaMensual;
     }
 }
