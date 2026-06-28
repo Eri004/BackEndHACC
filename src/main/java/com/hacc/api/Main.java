@@ -1,10 +1,6 @@
 package com.hacc.api;
 
-import java.io.FileOutputStream;
-import java.nio.file.Path;
-
 import com.hacc.api.application.service.ReportService;
-import com.hacc.api.request.ReportRequest;
 
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.QuarkusApplication;
@@ -13,7 +9,7 @@ import jakarta.inject.Inject;
 public class Main {
 
     public static void main(String[] args) {
-        Quarkus.run(App.class,args);
+        Quarkus.run(args);
     }
 
     public static class App implements QuarkusApplication {

@@ -22,7 +22,6 @@ public class PagoImpl implements IPagoRepo {
     EntityManager em;
 
     // ==================== MÉTODOS EXISTENTES (MANTENIDOS) ====================
-
     @Override
     public void crearPago(Pago pago) {
         this.em.persist(pago);
@@ -55,8 +54,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPagosPorResidente(Integer idResidente) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente", 
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         return query.getResultList();
@@ -65,8 +64,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> findByPeriodo(LocalDate start, LocalDate end) {
         TypedQuery<Pago> query = em.createQuery(
-            "SELECT p FROM Pago p WHERE p.fecha BETWEEN :start AND :end",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.fecha BETWEEN :start AND :end",
+                Pago.class
         );
         query.setParameter("start", start);
         query.setParameter("end", end);
@@ -74,7 +73,6 @@ public class PagoImpl implements IPagoRepo {
     }
 
     // ==================== NUEVOS MÉTODOS PARA EL SERVICE ====================
-
     @Override
     public Optional<Pago> buscarPorId(Integer idPago) {
         Pago pago = this.em.find(Pago.class, idPago);
@@ -84,8 +82,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarTodos() {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p ORDER BY p.fecha DESC", 
-            Pago.class
+                "SELECT p FROM Pago p ORDER BY p.fecha DESC",
+                Pago.class
         );
         return query.getResultList();
     }
@@ -93,8 +91,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorResidente(Integer idResidente) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         return query.getResultList();
@@ -103,8 +101,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorEstado(EstadoPago estado) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.estado = :estado ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.estado = :estado ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("estado", estado);
         return query.getResultList();
@@ -113,8 +111,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorEstadoYPeriodo(EstadoPago estado, String periodo) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.estado = :estado AND p.periodo = :periodo ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.estado = :estado AND p.periodo = :periodo ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("estado", estado);
         query.setParameter("periodo", periodo);
@@ -124,8 +122,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorPeriodo(String periodo) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.periodo = :periodo ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.periodo = :periodo ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("periodo", periodo);
         return query.getResultList();
@@ -134,8 +132,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorRangoFechas(LocalDate fechaInicio, LocalDate fechaFin) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.fecha BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.fecha BETWEEN :fechaInicio AND :fechaFin ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("fechaInicio", fechaInicio);
         query.setParameter("fechaFin", fechaFin);
@@ -145,8 +143,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorEstadoYFechaVencimientoBefore(EstadoPago estado, LocalDate fecha) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.estado = :estado AND p.fechaVencimiento < :fecha ORDER BY p.fechaVencimiento ASC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.estado = :estado AND p.fechaVencimiento < :fecha ORDER BY p.fechaVencimiento ASC",
+                Pago.class
         );
         query.setParameter("estado", estado);
         query.setParameter("fecha", fecha);
@@ -156,8 +154,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorResidenteYEstadoYFechaVencimientoBefore(Integer idResidente, EstadoPago estado, LocalDate fecha) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado AND p.fechaVencimiento < :fecha ORDER BY p.fechaVencimiento ASC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado AND p.fechaVencimiento < :fecha ORDER BY p.fechaVencimiento ASC",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("estado", estado);
@@ -168,8 +166,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorResidenteYEstadoYFechaVencimientoAfterOrEqual(Integer idResidente, EstadoPago estado, LocalDate fecha) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado AND p.fechaVencimiento >= :fecha ORDER BY p.fechaVencimiento ASC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado AND p.fechaVencimiento >= :fecha ORDER BY p.fechaVencimiento ASC",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("estado", estado);
@@ -180,8 +178,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Pago> listarPorResidenteYEstado(Integer idResidente, EstadoPago estado) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("estado", estado);
@@ -191,8 +189,8 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public boolean existePagoPorResidenteYPeriodo(Integer idResidente, String periodo) {
         TypedQuery<Long> query = this.em.createQuery(
-            "SELECT COUNT(p) FROM Pago p WHERE p.idResidente = :idResidente AND p.periodo = :periodo",
-            Long.class
+                "SELECT COUNT(p) FROM Pago p WHERE p.idResidente = :idResidente AND p.periodo = :periodo",
+                Long.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("periodo", periodo);
@@ -201,15 +199,14 @@ public class PagoImpl implements IPagoRepo {
     }
 
     // ==================== MÉTODOS ADICIONALES ÚTILES ====================
-
     /**
      * Obtiene pagos por estado y residente (con paginación opcional)
      */
     @Override
     public List<Pago> listarPorResidenteYEstadoConLimite(Integer idResidente, EstadoPago estado, int limite) {
         TypedQuery<Pago> query = this.em.createQuery(
-            "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado ORDER BY p.fecha DESC",
-            Pago.class
+                "SELECT p FROM Pago p WHERE p.idResidente = :idResidente AND p.estado = :estado ORDER BY p.fecha DESC",
+                Pago.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("estado", estado);
@@ -218,14 +215,15 @@ public class PagoImpl implements IPagoRepo {
     }
 
     /**
-     * Obtiene el total de deuda de un residente (suma de todos los pagos pendientes y vencidos)
+     * Obtiene el total de deuda de un residente (suma de todos los pagos
+     * pendientes y vencidos)
      */
     @Override
     public Double obtenerTotalDeudaResidente(Integer idResidente) {
         TypedQuery<Double> query = this.em.createQuery(
-            "SELECT COALESCE(SUM(p.montoEsperado), 0) FROM Pago p " +
-            "WHERE p.idResidente = :idResidente AND p.estado IN :estados",
-            Double.class
+                "SELECT COALESCE(SUM(p.montoEsperado), 0) FROM Pago p "
+                + "WHERE p.idResidente = :idResidente AND p.estado IN :estados",
+                Double.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("estados", List.of(EstadoPago.PENDIENTE, EstadoPago.VENCIDO));
@@ -238,9 +236,9 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public Double obtenerTotalPagadoPorResidenteYPeriodo(Integer idResidente, String periodo) {
         TypedQuery<Double> query = this.em.createQuery(
-            "SELECT COALESCE(SUM(p.montoPagado), 0) FROM Pago p " +
-            "WHERE p.idResidente = :idResidente AND p.periodo = :periodo AND p.estado = :estado",
-            Double.class
+                "SELECT COALESCE(SUM(p.montoPagado), 0) FROM Pago p "
+                + "WHERE p.idResidente = :idResidente AND p.periodo = :periodo AND p.estado = :estado",
+                Double.class
         );
         query.setParameter("idResidente", idResidente);
         query.setParameter("periodo", periodo);
@@ -262,9 +260,9 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public Long contarResidentesEnMora() {
         TypedQuery<Long> query = this.em.createQuery(
-            "SELECT COUNT(DISTINCT p.idResidente) FROM Pago p " +
-            "WHERE p.estado = :estado AND p.fechaVencimiento < :fecha",
-            Long.class
+                "SELECT COUNT(DISTINCT p.idResidente) FROM Pago p "
+                + "WHERE p.estado = :estado AND p.fechaVencimiento < :fecha",
+                Long.class
         );
         query.setParameter("estado", EstadoPago.PENDIENTE);
         query.setParameter("fecha", LocalDate.now());
@@ -277,10 +275,27 @@ public class PagoImpl implements IPagoRepo {
     @Override
     public List<Object[]> contarPagosPorEstado() {
         TypedQuery<Object[]> query = this.em.createQuery(
-            "SELECT p.estado, COUNT(p), COALESCE(SUM(p.montoEsperado), 0) " +
-            "FROM Pago p GROUP BY p.estado",
-            Object[].class
+                "SELECT p.estado, COUNT(p), COALESCE(SUM(p.montoEsperado), 0) "
+                + "FROM Pago p GROUP BY p.estado",
+                Object[].class
         );
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Pago> listarProximosAVencer(LocalDate inicio, LocalDate fin) {
+
+        TypedQuery<Pago> query = em.createQuery(
+                "SELECT p FROM Pago p "
+                + "WHERE p.estado = :estado "
+                + "AND p.fechaVencimiento BETWEEN :inicio AND :fin",
+                Pago.class
+        );
+
+        query.setParameter("estado", EstadoPago.PENDIENTE);
+        query.setParameter("inicio", inicio);
+        query.setParameter("fin", fin);
+
         return query.getResultList();
     }
 }

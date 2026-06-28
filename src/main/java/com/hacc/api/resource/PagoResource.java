@@ -6,7 +6,17 @@ import com.hacc.api.application.service.PagoService;
 import com.hacc.api.domain.model.Pago;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -19,7 +29,6 @@ public class PagoResource {
     PagoService pagoService;
 
     // ==================== ENDPOINTS EXISTENTES (CORREGIDOS) ====================
-
     @GET
     public Response listarPagos(@QueryParam("idResidente") Integer idResidente) {
         if (idResidente != null) {
@@ -57,21 +66,30 @@ public class PagoResource {
                 .orElseThrow(() -> new NotFoundException("Pago no encontrado con ID: " + idPago));
 
         // Actualizar solo los campos permitidos
-        if (pago.getTitulo() != null) existente.setTitulo(pago.getTitulo());
-        if (pago.getMontoEsperado() != null) existente.setMontoEsperado(pago.getMontoEsperado());
-        if (pago.getFechaVencimiento() != null) existente.setFechaVencimiento(pago.getFechaVencimiento());
-        if (pago.getPeriodo() != null) existente.setPeriodo(pago.getPeriodo());
-        if (pago.getObservacion() != null) existente.setObservacion(pago.getObservacion());
+        if (pago.getTitulo() != null) {
+            existente.setTitulo(pago.getTitulo());
+        }
+        if (pago.getMontoEsperado() != null) {
+            existente.setMontoEsperado(pago.getMontoEsperado());
+        }
+        if (pago.getFechaVencimiento() != null) {
+            existente.setFechaVencimiento(pago.getFechaVencimiento());
+        }
+        if (pago.getPeriodo() != null) {
+            existente.setPeriodo(pago.getPeriodo());
+        }
+        if (pago.getObservacion() != null) {
+            existente.setObservacion(pago.getObservacion());
+        }
 
         Pago actualizado = pagoService.actualizar(existente);
         return Response.ok(actualizado).build();
     }
 
     // ==================== NUEVOS ENDPOINTS PARA FUNCIONALIDADES ====================
-
     /**
-     * Genera cuotas mensuales para todos los residentes activos.
-     * Debe ejecutarse mediante un cron job, pero se expone para pruebas.
+     * Genera cuotas mensuales para todos los residentes activos. Debe
+     * ejecutarse mediante un cron job, pero se expone para pruebas.
      */
     @POST
     @Path("/generar-cuotas")
@@ -81,8 +99,7 @@ public class PagoResource {
     }
 
     /**
-     * Registra el pago de una cuota.
-     * Body: { "montoRecibido": 150.00 }
+     * Registra el pago de una cuota. Body: { "montoRecibido": 150.00 }
      */
     @POST
     @Path("/{idPago}/registrar")
@@ -92,8 +109,8 @@ public class PagoResource {
     }
 
     /**
-     * Anula un pago (solo si no está pagado).
-     * Body: { "motivo": "Error en el registro" }
+     * Anula un pago (solo si no está pagado). Body: { "motivo": "Error en el
+     * registro" }
      */
     @POST
     @Path("/{idPago}/anular")
@@ -103,14 +120,13 @@ public class PagoResource {
     }
 
     // ==================== FILTROS Y CONSULTAS ====================
-
     @GET
     @Path("/estado")
     public Response filtrarPorEstado(@QueryParam("estado") String estado) {
         // Convertir String a Enum (manejar error)
         try {
-            com.hacc.api.domain.enums.EstadoPago estadoEnum = 
-                com.hacc.api.domain.enums.EstadoPago.valueOf(estado.toUpperCase());
+            com.hacc.api.domain.enums.EstadoPago estadoEnum
+                    = com.hacc.api.domain.enums.EstadoPago.valueOf(estado.toUpperCase());
             return Response.ok(pagoService.filtrarPorEstado(estadoEnum)).build();
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Estado inválido. Valores permitidos: PENDIENTE, PAGADO, VENCIDO, ANULADO");
@@ -139,8 +155,8 @@ public class PagoResource {
             @QueryParam("estado") String estado,
             @QueryParam("periodo") String periodo) {
         try {
-            com.hacc.api.domain.enums.EstadoPago estadoEnum = 
-                com.hacc.api.domain.enums.EstadoPago.valueOf(estado.toUpperCase());
+            com.hacc.api.domain.enums.EstadoPago estadoEnum
+                    = com.hacc.api.domain.enums.EstadoPago.valueOf(estado.toUpperCase());
             return Response.ok(pagoService.filtrarPorEstadoYPeriodo(estadoEnum, periodo)).build();
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Estado inválido");
@@ -148,7 +164,6 @@ public class PagoResource {
     }
 
     // ==================== MORA ====================
-
     @GET
     @Path("/mora")
     public Response obtenerResidentesEnMora() {
@@ -169,7 +184,6 @@ public class PagoResource {
     }
 
     // ==================== REPORTES Y ESTADÍSTICAS ====================
-
     @GET
     @Path("/resumen")
     public Response obtenerResumenFinanciero(@QueryParam("periodo") String periodo) {
@@ -192,22 +206,34 @@ public class PagoResource {
     }
 
     // ==================== CLASES DTO PARA REQUESTS (internas) ====================
-
     public static class RegistrarPagoRequest {
+
         private Double montoRecibido;
 
-        public Double getMontoRecibido() { return montoRecibido; }
-        public void setMontoRecibido(Double montoRecibido) { this.montoRecibido = montoRecibido; }
+        public Double getMontoRecibido() {
+            return montoRecibido;
+        }
+
+        public void setMontoRecibido(Double montoRecibido) {
+            this.montoRecibido = montoRecibido;
+        }
     }
 
     public static class AnularPagoRequest {
+
         private String motivo;
 
-        public String getMotivo() { return motivo; }
-        public void setMotivo(String motivo) { this.motivo = motivo; }
+        public String getMotivo() {
+            return motivo;
+        }
+
+        public void setMotivo(String motivo) {
+            this.motivo = motivo;
+        }
     }
 
     public static class MoraResponse {
+
         private Integer idResidente;
         private Boolean enMora;
 
@@ -216,9 +242,26 @@ public class PagoResource {
             this.enMora = enMora;
         }
 
-        public Integer getIdResidente() { return idResidente; }
-        public void setIdResidente(Integer idResidente) { this.idResidente = idResidente; }
-        public Boolean getEnMora() { return enMora; }
-        public void setEnMora(Boolean enMora) { this.enMora = enMora; }
+        public Integer getIdResidente() {
+            return idResidente;
+        }
+
+        public void setIdResidente(Integer idResidente) {
+            this.idResidente = idResidente;
+        }
+
+        public Boolean getEnMora() {
+            return enMora;
+        }
+
+        public void setEnMora(Boolean enMora) {
+            this.enMora = enMora;
+        }
+    }
+
+    @GET
+    @Path("/notificaciones")
+    public Response obtenerNotificaciones() {
+        return Response.ok(pagoService.obtenerNotificaciones()).build();
     }
 }

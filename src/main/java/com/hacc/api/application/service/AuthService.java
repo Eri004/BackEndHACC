@@ -2,6 +2,7 @@ package com.hacc.api.application.service;
 
 import com.hacc.api.domain.model.Propietario;
 import com.hacc.api.domain.model.Residente;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -40,9 +41,10 @@ public class AuthService {
                 Propietario.class)
                 .setParameter("email", email)
                 .getSingleResult();
-            if (!passwordPlain.equals(propietario.getContrasena())) {
-                throw new RuntimeException("Credenciales inválidas");
-            }
+            if (propietario.getContrasena() == null ||
+    !propietario.getContrasena().equals(passwordPlain)) {
+    throw new RuntimeException("Credenciales inválidas");
+}
             
             return new AuthResponse(
                 propietario.getId_propietario(),
@@ -55,7 +57,7 @@ public class AuthService {
             );
             
         } catch (NoResultException e1) {
-            // 2. Buscar en residentes
+
             try {
                 Residente residente = em.createQuery(
                     "SELECT r FROM Residente r WHERE r.email = :email", 

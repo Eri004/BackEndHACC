@@ -1,23 +1,30 @@
 package com.hacc.api.application.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hacc.api.domain.enums.EstadoPago;
 import com.hacc.api.domain.model.Pago;
 import com.hacc.api.domain.model.Residente;
 import com.hacc.api.domain.repository.IPagoRepo;
 import com.hacc.api.domain.repository.IResidenteRepo;
+import com.hacc.api.request.NotificacionDTO;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class PagoService {
@@ -702,4 +709,54 @@ public class PagoService {
         public List<ResidenteEnMoraDTO> getResidentesEnMora() { return residentesEnMora; }
         public void setResidentesEnMora(List<ResidenteEnMoraDTO> residentesEnMora) { this.residentesEnMora = residentesEnMora; }
     }
+
+    public List<NotificacionDTO> obtenerNotificaciones() {
+
+    LocalDate hoy = LocalDate.now();
+    LocalDate finMes = hoy.plusDays(5);
+
+    List<Pago> vencidos = pagoRepo.listarVencidos();
+    List<Pago> proximos = pagoRepo.listarProximosAVencer(hoy, finMes);
+
+    List<NotificacionDTO> resultado = new ArrayList<>();
+    Set<Integer> ids = new HashSet<>();
+
+    for (Pago p : vencidos) {
+    if (ids.add(p.getId_pago())) {
+        resultado.add(mapToDTO(p, "MORA"));
+    }
+}
+
+for (Pago p : proximos) {
+    if (ids.add(p.getId_pago())) {
+        resultado.add(mapToDTO(p, "PROXIMO"));
+    }
+}
+
+    return resultado;
+}
+private NotificacionDTO mapToDTO(Pago p, String tipo) {
+
+    Residente r = residenteRepo.buscarPorId(p.getIdResidente())
+            .orElse(null);
+
+    NotificacionDTO dto = new NotificacionDTO();
+
+    dto.setIdPago(p.getId_pago());
+    dto.setIdResidente(p.getIdResidente());
+
+    if (r != null) {
+        dto.setNombreResidente(r.getNombre());
+        dto.setDepartamento(r.getDepartamento());
+    } else {
+        dto.setNombreResidente("Desconocido");
+        dto.setDepartamento("");
+    }
+
+    dto.setMonto(p.getMonto());
+    dto.setFechaVencimiento(p.getFechaVencimiento());
+    dto.setTipo(tipo);
+
+    return dto;
+}
 }

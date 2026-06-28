@@ -1,5 +1,8 @@
 package com.hacc.api.resource;
 
+import java.util.List;
+import java.util.Set;
+
 import com.hacc.api.application.service.EdificioService;
 import com.hacc.api.application.service.PropietarioService;
 import com.hacc.api.domain.model.Edificio;
@@ -8,17 +11,22 @@ import com.hacc.api.domain.model.Unidad;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ForbiddenException;
-
-import java.util.List;
-import java.util.Set;
 
 @Path("/edificios")
 @Produces(MediaType.APPLICATION_JSON)
@@ -194,33 +202,26 @@ public class EdificioResource {
      * Crear un edificio con unidades
      * POST /edificios/con-unidades
      */
-    @POST
-    @Path("/con-unidades")
-    @RolesAllowed({"PROPIETARIO", "ADMIN"})
-    public Response crearEdificioConUnidades(
-            @QueryParam("idPropietario") Integer idPropietario,
-            CrearEdificioConUnidadesRequest request,
-            @Context SecurityContext securityContext) {
-        
-        // Si es PROPIETARIO, usar su ID automáticamente
-        if (!securityContext.isUserInRole("ADMIN")) {
-            String email = securityContext.getUserPrincipal().getName();
-            Propietario propietario = propietarioService.buscarPorEmail(email)
-                    .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
-            idPropietario = propietario.getId_propietario();
-        }
-        
-        if (idPropietario == null) {
-            throw new BadRequestException("idPropietario es obligatorio");
-        }
-        
-        Edificio nuevo = edificioService.registrarEdificioConUnidades(
-                request.getEdificio(),
-                idPropietario,
-                request.getUnidades()
-        );
-        return Response.status(Response.Status.CREATED).entity(nuevo).build();
+   @POST
+@Path("/con-unidades")
+@RolesAllowed({"propietario", "ADMIN"})
+public Response crearEdificioConUnidades(
+        @QueryParam("idPropietario") Integer idPropietario,
+        CrearEdificioConUnidadesRequest request) {
+
+    // Si es PROPIETARIO, usar su ID automáticamente
+    if (idPropietario == null) {
+        throw new BadRequestException("idPropietario es obligatorio");
     }
+
+    Edificio nuevo = edificioService.registrarEdificioConUnidades(
+            request.getEdificio(),
+            idPropietario,
+            request.getUnidades()
+    );
+
+    return Response.status(Response.Status.CREATED).entity(nuevo).build();
+}
 
     /**
      * Actualizar un edificio

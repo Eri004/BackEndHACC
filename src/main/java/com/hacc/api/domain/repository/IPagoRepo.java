@@ -1,10 +1,11 @@
 package com.hacc.api.domain.repository;
 
-import com.hacc.api.domain.enums.EstadoPago;
-import com.hacc.api.domain.model.Pago;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import com.hacc.api.domain.enums.EstadoPago;
+import com.hacc.api.domain.model.Pago;
 
 public interface IPagoRepo {
     void crearPago(Pago pago);
@@ -14,6 +15,7 @@ public interface IPagoRepo {
     List<Pago> listarPagos();
     List<Pago> listarPagosPorResidente(Integer idResidente);
     List<Pago> findByPeriodo(LocalDate start, LocalDate end);
+    List<Pago> listarProximosAVencer(LocalDate fechaInicio, LocalDate fechaFin);
 
     Optional<Pago> buscarPorId(Integer idPago);
     List<Pago> listarTodos();

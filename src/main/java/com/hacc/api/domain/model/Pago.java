@@ -55,7 +55,7 @@ public class Pago {
     @Column(name = "pag_fecha_pago")
     private LocalDate fechaPago; 
     
-    @Column(name = "pag_periodo", nullable = false, length = 7)
+    @Column(name = "pag_periodo", nullable = false, length =20)
     private String periodo;
     
     @Enumerated(EnumType.STRING)
