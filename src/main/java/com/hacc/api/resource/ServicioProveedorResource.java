@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Path("/finanzas/servicios")
 @Produces(MediaType.APPLICATION_JSON)

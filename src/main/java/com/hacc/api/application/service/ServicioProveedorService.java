@@ -3,13 +3,13 @@ package com.hacc.api.application.service;
 import com.hacc.api.domain.model.ServicioProveedor;
 import com.hacc.api.domain.model.Propietario;
 import com.hacc.api.domain.model.FinanzaTransaccion;
+import com.hacc.api.domain.model.PlantillaServicio;
 import com.hacc.api.domain.repository.IServicioProveedorRepo;
 import com.hacc.api.domain.repository.IPropietarioRepo;
 import com.hacc.api.domain.repository.IFinanzaTransaccionRepo;
+import com.hacc.api.domain.repository.IPlantillaServicioRepo;
 import com.hacc.api.domain.enums.NombreServicio;
 import com.hacc.api.domain.enums.EstadoServicio;
-import com.hacc.api.domain.enums.TipoTransaccion;
-import com.hacc.api.domain.enums.CategoriaTransaccion;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,6 +41,8 @@ public class ServicioProveedorService {
     @Inject
     IFinanzaTransaccionRepo transaccionRepo;
 
+    @Inject
+    IPlantillaServicioRepo plantillaRepo;
     // ==================== CRUD BÁSICO ====================
 
     @Transactional
@@ -98,16 +100,20 @@ public class ServicioProveedorService {
                 .orElseThrow(() -> new NotFoundException("Servicio no encontrado con ID: " + servicio.getIdServicio()));
 
         // Actualizar solo campos permitidos
-        if (servicio.getNombre() != null) existente.setNombre(servicio.getNombre());
+        if (servicio.getNombre() != null)
+            existente.setNombre(servicio.getNombre());
         if (servicio.getMontoFacturado() != null) {
             existente.setMontoFacturado(servicio.getMontoFacturado().setScale(2, RoundingMode.HALF_UP));
         }
         if (servicio.getMontoPagado() != null) {
             existente.setMontoPagado(servicio.getMontoPagado().setScale(2, RoundingMode.HALF_UP));
         }
-        if (servicio.getEstado() != null) existente.setEstado(servicio.getEstado());
-        if (servicio.getFechaVencimiento() != null) existente.setFechaVencimiento(servicio.getFechaVencimiento());
-        if (servicio.getMes() != null) existente.setMes(servicio.getMes());
+        if (servicio.getEstado() != null)
+            existente.setEstado(servicio.getEstado());
+        if (servicio.getFechaVencimiento() != null)
+            existente.setFechaVencimiento(servicio.getFechaVencimiento());
+        if (servicio.getMes() != null)
+            existente.setMes(servicio.getMes());
 
         existente.setActualizadoEn(LocalDateTime.now());
 
@@ -210,13 +216,15 @@ public class ServicioProveedorService {
         return servicioRepo.listarPorPropietarioYMes(idPropietario, mes);
     }
 
-    public List<ServicioProveedor> filtrarPorPropietarioMesYEstado(Integer idPropietario, String mes, EstadoServicio estado) {
+    public List<ServicioProveedor> filtrarPorPropietarioMesYEstado(Integer idPropietario, String mes,
+            EstadoServicio estado) {
         propietarioRepo.buscarPorId(idPropietario)
                 .orElseThrow(() -> new NotFoundException("Propietario no encontrado con ID: " + idPropietario));
         return servicioRepo.listarPorPropietarioMesYEstado(idPropietario, mes, estado);
     }
 
-    public List<ServicioProveedor> filtrarPorPropietarioMesYNombre(Integer idPropietario, String mes, NombreServicio nombre) {
+    public List<ServicioProveedor> filtrarPorPropietarioMesYNombre(Integer idPropietario, String mes,
+            NombreServicio nombre) {
         propietarioRepo.buscarPorId(idPropietario)
                 .orElseThrow(() -> new NotFoundException("Propietario no encontrado con ID: " + idPropietario));
         return servicioRepo.listarPorPropietarioMesYNombre(idPropietario, mes, nombre);
@@ -226,7 +234,8 @@ public class ServicioProveedorService {
         return servicioRepo.listarPorRangoFechas(fechaInicio, fechaFin);
     }
 
-    public List<ServicioProveedor> filtrarPorPropietarioYRangoFechas(Integer idPropietario, LocalDate fechaInicio, LocalDate fechaFin) {
+    public List<ServicioProveedor> filtrarPorPropietarioYRangoFechas(Integer idPropietario, LocalDate fechaInicio,
+            LocalDate fechaFin) {
         propietarioRepo.buscarPorId(idPropietario)
                 .orElseThrow(() -> new NotFoundException("Propietario no encontrado con ID: " + idPropietario));
         return servicioRepo.listarPorPropietarioYRangoFechas(idPropietario, fechaInicio, fechaFin);
@@ -277,6 +286,104 @@ public class ServicioProveedorService {
         resumen.setServicios(servicios);
 
         return resumen;
+    }
+
+    /**
+     * Genera servicios automáticamente a partir de las plantillas activas
+     * Este método debe ejecutarse mediante un cron job (ej. diariamente a las
+     * 00:00)
+     */
+    @Transactional
+    public int generarServiciosDesdePlantillas() {
+        LOG.info("Generando servicios automáticos desde plantillas...");
+
+        List<PlantillaServicio> plantillas = plantillaRepo.listarActivasParaGenerar();
+        int serviciosGenerados = 0;
+        String mesActual = getPeriodoActual();
+
+        for (PlantillaServicio plantilla : plantillas) {
+            // Verificar si ya existe un servicio para este mes y plantilla
+            boolean yaExiste = servicioRepo.existeServicioPorPropietarioMesYNombre(
+                    plantilla.getIdPropietario(),
+                    mesActual,
+                    plantilla.getNombre());
+
+            if (!yaExiste) {
+                // Verificar si corresponde generar según la frecuencia
+                if (correspondeGenerar(plantilla, mesActual)) {
+                    ServicioProveedor nuevoServicio = new ServicioProveedor();
+                    nuevoServicio.setNombre(plantilla.getNombre());
+                    nuevoServicio.setMes(mesActual);
+                    nuevoServicio.setMontoFacturado(plantilla.getMontoBase());
+                    nuevoServicio.setMontoPagado(BigDecimal.ZERO);
+                    nuevoServicio.setEstado(EstadoServicio.PENDIENTE);
+                    nuevoServicio.setFechaVencimiento(
+                            calcularFechaVencimiento(mesActual, plantilla.getDiaVencimiento()));
+                    nuevoServicio.setPropietario(plantilla.getPropietario());
+                    nuevoServicio.setCreadoEn(LocalDateTime.now());
+                    nuevoServicio.setActualizadoEn(LocalDateTime.now());
+
+                    servicioRepo.crear(nuevoServicio);
+                    serviciosGenerados++;
+                    LOG.info("Servicio generado: {} - {} para propietario {}",
+                            plantilla.getNombre(), mesActual, plantilla.getIdPropietario());
+                }
+            }
+        }
+
+        LOG.info("Generados {} servicios automáticos", serviciosGenerados);
+        return serviciosGenerados;
+    }
+
+    /**
+     * Verifica si corresponde generar un servicio según la frecuencia
+     */
+    private boolean correspondeGenerar(PlantillaServicio plantilla, String mesActual) {
+        if (plantilla.getMesInicio() == null) {
+            return true; // Si no tiene fecha de inicio, siempre genera
+        }
+
+        LocalDate fechaInicio = LocalDate.parse(plantilla.getMesInicio() + "-01");
+        LocalDate fechaActual = LocalDate.parse(mesActual + "-01");
+
+        // Si la fecha actual es anterior a la fecha de inicio, no generar
+        if (fechaActual.isBefore(fechaInicio)) {
+            return false;
+        }
+
+        // Calcular meses de diferencia
+        int mesesDiferencia = (fechaActual.getYear() - fechaInicio.getYear()) * 12
+                + (fechaActual.getMonthValue() - fechaInicio.getMonthValue());
+
+        switch (plantilla.getFrecuencia()) {
+            case MENSUAL:
+                return true; // Cada mes
+            case BIMENSUAL:
+                return mesesDiferencia % 2 == 0;
+            case TRIMESTRAL:
+                return mesesDiferencia % 3 == 0;
+            case SEMESTRAL:
+                return mesesDiferencia % 6 == 0;
+            case ANUAL:
+                return mesesDiferencia % 12 == 0;
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Calcula la fecha de vencimiento para un mes y día específico
+     */
+    private LocalDate calcularFechaVencimiento(String mes, Integer dia) {
+        String[] partes = mes.split("-");
+        int anio = Integer.parseInt(partes[0]);
+        int mesNum = Integer.parseInt(partes[1]);
+
+        // Ajustar día si es mayor al máximo del mes
+        int maxDia = LocalDate.of(anio, mesNum, 1).lengthOfMonth();
+        int diaVenc = Math.min(dia, maxDia);
+
+        return LocalDate.of(anio, mesNum, diaVenc);
     }
 
     /**
@@ -353,22 +460,69 @@ public class ServicioProveedorService {
         private List<ServicioProveedor> servicios;
 
         // Getters y Setters
-        public String getMes() { return mes; }
-        public void setMes(String mes) { this.mes = mes; }
-        public Long getTotalServicios() { return totalServicios; }
-        public void setTotalServicios(Long totalServicios) { this.totalServicios = totalServicios; }
-        public Double getTotalFacturado() { return totalFacturado; }
-        public void setTotalFacturado(Double totalFacturado) { this.totalFacturado = totalFacturado; }
-        public Double getTotalPagado() { return totalPagado; }
-        public void setTotalPagado(Double totalPagado) { this.totalPagado = totalPagado; }
-        public Long getTotalPendientes() { return totalPendientes; }
-        public void setTotalPendientes(Long totalPendientes) { this.totalPendientes = totalPendientes; }
-        public Long getTotalPagados() { return totalPagados; }
-        public void setTotalPagados(Long totalPagados) { this.totalPagados = totalPagados; }
-        public Long getTotalEnDeuda() { return totalEnDeuda; }
-        public void setTotalEnDeuda(Long totalEnDeuda) { this.totalEnDeuda = totalEnDeuda; }
-        public List<ServicioProveedor> getServicios() { return servicios; }
-        public void setServicios(List<ServicioProveedor> servicios) { this.servicios = servicios; }
+        public String getMes() {
+            return mes;
+        }
+
+        public void setMes(String mes) {
+            this.mes = mes;
+        }
+
+        public Long getTotalServicios() {
+            return totalServicios;
+        }
+
+        public void setTotalServicios(Long totalServicios) {
+            this.totalServicios = totalServicios;
+        }
+
+        public Double getTotalFacturado() {
+            return totalFacturado;
+        }
+
+        public void setTotalFacturado(Double totalFacturado) {
+            this.totalFacturado = totalFacturado;
+        }
+
+        public Double getTotalPagado() {
+            return totalPagado;
+        }
+
+        public void setTotalPagado(Double totalPagado) {
+            this.totalPagado = totalPagado;
+        }
+
+        public Long getTotalPendientes() {
+            return totalPendientes;
+        }
+
+        public void setTotalPendientes(Long totalPendientes) {
+            this.totalPendientes = totalPendientes;
+        }
+
+        public Long getTotalPagados() {
+            return totalPagados;
+        }
+
+        public void setTotalPagados(Long totalPagados) {
+            this.totalPagados = totalPagados;
+        }
+
+        public Long getTotalEnDeuda() {
+            return totalEnDeuda;
+        }
+
+        public void setTotalEnDeuda(Long totalEnDeuda) {
+            this.totalEnDeuda = totalEnDeuda;
+        }
+
+        public List<ServicioProveedor> getServicios() {
+            return servicios;
+        }
+
+        public void setServicios(List<ServicioProveedor> servicios) {
+            this.servicios = servicios;
+        }
     }
 
     public static class DashboardServiciosDTO {
@@ -383,23 +537,76 @@ public class ServicioProveedorService {
         private List<Object[]> agrupadosPorEstado;
 
         // Getters y Setters
-        public String getMesActual() { return mesActual; }
-        public void setMesActual(String mesActual) { this.mesActual = mesActual; }
-        public Double getTotalFacturadoMes() { return totalFacturadoMes; }
-        public void setTotalFacturadoMes(Double totalFacturadoMes) { this.totalFacturadoMes = totalFacturadoMes; }
-        public Double getTotalPagadoMes() { return totalPagadoMes; }
-        public void setTotalPagadoMes(Double totalPagadoMes) { this.totalPagadoMes = totalPagadoMes; }
-        public Long getTotalPendientes() { return totalPendientes; }
-        public void setTotalPendientes(Long totalPendientes) { this.totalPendientes = totalPendientes; }
-        public Long getTotalPagados() { return totalPagados; }
-        public void setTotalPagados(Long totalPagados) { this.totalPagados = totalPagados; }
-        public Long getTotalEnDeuda() { return totalEnDeuda; }
-        public void setTotalEnDeuda(Long totalEnDeuda) { this.totalEnDeuda = totalEnDeuda; }
-        public Long getTotalCortados() { return totalCortados; }
-        public void setTotalCortados(Long totalCortados) { this.totalCortados = totalCortados; }
-        public List<ServicioProveedor> getServiciosVencidos() { return serviciosVencidos; }
-        public void setServiciosVencidos(List<ServicioProveedor> serviciosVencidos) { this.serviciosVencidos = serviciosVencidos; }
-        public List<Object[]> getAgrupadosPorEstado() { return agrupadosPorEstado; }
-        public void setAgrupadosPorEstado(List<Object[]> agrupadosPorEstado) { this.agrupadosPorEstado = agrupadosPorEstado; }
+        public String getMesActual() {
+            return mesActual;
+        }
+
+        public void setMesActual(String mesActual) {
+            this.mesActual = mesActual;
+        }
+
+        public Double getTotalFacturadoMes() {
+            return totalFacturadoMes;
+        }
+
+        public void setTotalFacturadoMes(Double totalFacturadoMes) {
+            this.totalFacturadoMes = totalFacturadoMes;
+        }
+
+        public Double getTotalPagadoMes() {
+            return totalPagadoMes;
+        }
+
+        public void setTotalPagadoMes(Double totalPagadoMes) {
+            this.totalPagadoMes = totalPagadoMes;
+        }
+
+        public Long getTotalPendientes() {
+            return totalPendientes;
+        }
+
+        public void setTotalPendientes(Long totalPendientes) {
+            this.totalPendientes = totalPendientes;
+        }
+
+        public Long getTotalPagados() {
+            return totalPagados;
+        }
+
+        public void setTotalPagados(Long totalPagados) {
+            this.totalPagados = totalPagados;
+        }
+
+        public Long getTotalEnDeuda() {
+            return totalEnDeuda;
+        }
+
+        public void setTotalEnDeuda(Long totalEnDeuda) {
+            this.totalEnDeuda = totalEnDeuda;
+        }
+
+        public Long getTotalCortados() {
+            return totalCortados;
+        }
+
+        public void setTotalCortados(Long totalCortados) {
+            this.totalCortados = totalCortados;
+        }
+
+        public List<ServicioProveedor> getServiciosVencidos() {
+            return serviciosVencidos;
+        }
+
+        public void setServiciosVencidos(List<ServicioProveedor> serviciosVencidos) {
+            this.serviciosVencidos = serviciosVencidos;
+        }
+
+        public List<Object[]> getAgrupadosPorEstado() {
+            return agrupadosPorEstado;
+        }
+
+        public void setAgrupadosPorEstado(List<Object[]> agrupadosPorEstado) {
+            this.agrupadosPorEstado = agrupadosPorEstado;
+        }
     }
 }
