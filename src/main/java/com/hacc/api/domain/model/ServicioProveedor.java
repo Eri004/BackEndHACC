@@ -3,6 +3,7 @@ package com.hacc.api.domain.model;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hacc.api.domain.enums.EstadoServicio;
 import com.hacc.api.domain.enums.NombreServicio;
 
@@ -40,10 +41,19 @@ public class ServicioProveedor {
 
     @Column(name = "ser_fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
-
+    
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_transaccion_id")
     private FinanzaTransaccion transaccion; 
+    
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_propietario", nullable = false)
+    private Propietario propietario;
+
+    @Column(name = "id_propietario", insertable = false, updatable = false)
+    private Integer idPropietario;
 
     @CreationTimestamp
     @Column(name = "ser_creado_en", updatable = false)
@@ -139,5 +149,21 @@ public class ServicioProveedor {
                 + ", montoFacturado=" + montoFacturado + ", montoPagado=" + montoPagado + ", estado=" + estado
                 + ", fechaVencimiento=" + fechaVencimiento + ", transaccion=" + transaccion + ", creadoEn=" + creadoEn
                 + ", actualizadoEn=" + actualizadoEn + "]";
+    }
+
+    public Propietario getPropietario() {
+        return propietario;
+    }
+
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
+    }
+
+    public Integer getIdPropietario() {
+        return idPropietario;
+    }
+
+    public void setIdPropietario(Integer idPropietario) {
+        this.idPropietario = idPropietario;
     }
 }

@@ -1,6 +1,7 @@
 package com.hacc.api.infrastructure.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.hacc.api.domain.model.Propietario;
 import com.hacc.api.domain.repository.IPropietarioRepo;
@@ -63,5 +64,21 @@ public class PropietarioImpl implements IPropietarioRepo{
         query.setParameter("cedula", cedula);
         Long count = query.getSingleResult();
         return count > 0;
+    }
+    @Override
+    public Optional<Propietario> buscarPorId(Integer id) {
+        Propietario propietario = em.find(Propietario.class, id);
+        return Optional.ofNullable(propietario);
+    }
+
+    @Override
+    public List<Propietario> listarTodos() {
+        TypedQuery<Propietario> query = em.createQuery("SELECT p FROM Propietario p", Propietario.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public void actualizar(Propietario propietario) {
+        em.merge(propietario);
     }
 }

@@ -1,6 +1,7 @@
 package com.hacc.api.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.hacc.api.domain.model.Propietario;
 
@@ -12,4 +13,8 @@ public interface IPropietarioRepo {
     public List<Propietario> listarPropietarios();
     public boolean existePorEmail(String email);
     public boolean existePorCedula(String cedula);
+    Optional<Propietario> buscarPorId(Integer id);
+    List<Propietario> listarTodos();
+    void actualizar(Propietario propietario);
+
 }

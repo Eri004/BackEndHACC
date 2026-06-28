@@ -5,5 +5,6 @@ public enum CategoriaTransaccion {
     SERVICIOS_BASICOS,
     OPERACIONES,
     SEGURIDAD,
-    INGRESOS_EXTRA
+    INGRESOS_EXTRA,
+    OTROS
 }

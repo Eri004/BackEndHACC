@@ -2,6 +2,7 @@ package com.hacc.api.domain.model;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hacc.api.domain.enums.CategoriaTransaccion;
 import com.hacc.api.domain.enums.TipoTransaccion;
 
@@ -43,7 +44,15 @@ public class FinanzaTransaccion {
     private String comprobante; 
 
     @Column(name = "fin_periodo", nullable = false, length = 7)
-    private String periodo; 
+    private String periodo;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_propietario", nullable = false)
+    private Propietario propietario;
+
+    @Column(name = "id_propietario", insertable = false, updatable = false)
+    private Integer idPropietario;
 
     @CreationTimestamp
     @Column(name = "fin_creado_en", updatable = false)
@@ -152,5 +161,21 @@ public class FinanzaTransaccion {
     // @ManyToOne
     // @JoinColumn(name = "id_usuario_registra")
     // private Usuario usuarioRegistra;
+
+    public Propietario getPropietario() {
+        return propietario;
+    }
+
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
+    }
+
+    public Integer getIdPropietario() {
+        return idPropietario;
+    }
+
+    public void setIdPropietario(Integer idPropietario) {
+        this.idPropietario = idPropietario;
+    }
 
 }

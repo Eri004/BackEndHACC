@@ -3,6 +3,8 @@ package com.hacc.api.domain.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +37,17 @@ public class Propietario {
     private String cedula;
 
     @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Unidad> unidades = new ArrayList<>();
     
+    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<FinanzaTransaccion> transacciones = new ArrayList<>();
+
+    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ServicioProveedor> servicios = new ArrayList<>();
+
     public Integer getId_propietario() {
         return id_propietario;
     }
@@ -90,5 +101,23 @@ public class Propietario {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+    public List<Unidad> getUnidades() {
+        return unidades;
+    }
+    public void setUnidades(List<Unidad> unidades) {
+        this.unidades = unidades;
+    }
+    public List<FinanzaTransaccion> getTransacciones() {
+        return transacciones;
+    }
+    public void setTransacciones(List<FinanzaTransaccion> transacciones) {
+        this.transacciones = transacciones;
+    }
+    public List<ServicioProveedor> getServicios() {
+        return servicios;
+    }
+    public void setServicios(List<ServicioProveedor> servicios) {
+        this.servicios = servicios;
     }
 }
