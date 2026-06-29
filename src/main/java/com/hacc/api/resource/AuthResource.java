@@ -46,11 +46,6 @@ public class AuthResource {
             .build();
 }           
 
-System.out.println("id = " + user.id);
-System.out.println("nombre = " + user.nombre);
-System.out.println("apellido = " + user.apellido);
-System.out.println("rol = " + user.rol);
-System.out.println("email = " + user.email);
             return Response.ok(Map.of(
                     "success", true,
                     "id", user.id,
