@@ -2,6 +2,7 @@ package com.hacc.api.domain.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.hacc.api.domain.enums.EstadoUnidad;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -43,7 +44,6 @@ public class Unidad {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_edificio", nullable = false)
     private Edificio edificio;
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_propietario")
     private Propietario propietario;
@@ -120,10 +120,4 @@ public class Unidad {
     }
 
     
-}
-
-enum EstadoUnidad {
-    OCUPADO,
-    DISPONIBLE,
-    MANTENIMIENTO
 }

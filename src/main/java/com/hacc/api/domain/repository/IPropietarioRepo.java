@@ -16,5 +16,5 @@ public interface IPropietarioRepo {
     Optional<Propietario> buscarPorId(Integer id);
     List<Propietario> listarTodos();
     void actualizar(Propietario propietario);
-
+    Optional<Propietario> buscarPorEmail(String email);
 }

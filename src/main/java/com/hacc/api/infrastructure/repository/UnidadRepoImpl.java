@@ -44,18 +44,16 @@ public class UnidadRepoImpl implements IUnidadRepo {
     @Override
     public List<Unidad> listarUnidades() {
         TypedQuery<Unidad> query = entityManager.createQuery(
-            "SELECT u FROM Unidad u ORDER BY u.edificio.nombre, u.numero", 
-            Unidad.class
-        );
+                "SELECT u FROM Unidad u ORDER BY u.edificio.nombre, u.numero",
+                Unidad.class);
         return query.getResultList();
     }
 
     @Override
     public List<Unidad> listarUnidadesPorEdificio(Integer edificioId) {
         TypedQuery<Unidad> query = entityManager.createQuery(
-            "SELECT u FROM Unidad u WHERE u.edificio.idEdificio = :edificioId ORDER BY u.numero",
-            Unidad.class
-        );
+                "SELECT u FROM Unidad u WHERE u.edificio.idEdificio = :edificioId ORDER BY u.numero",
+                Unidad.class);
         query.setParameter("edificioId", edificioId);
         return query.getResultList();
     }
@@ -63,9 +61,8 @@ public class UnidadRepoImpl implements IUnidadRepo {
     @Override
     public List<Unidad> listarUnidadesPorPropietario(Integer propietarioId) {
         TypedQuery<Unidad> query = entityManager.createQuery(
-            "SELECT u FROM Unidad u WHERE u.propietario.idPropietario = :propietarioId ORDER BY u.edificio.nombre, u.numero",
-            Unidad.class
-        );
+                "SELECT u FROM Unidad u WHERE u.propietario.idPropietario = :propietarioId ORDER BY u.edificio.nombre, u.numero",
+                Unidad.class);
         query.setParameter("propietarioId", propietarioId);
         return query.getResultList();
     }
@@ -73,11 +70,19 @@ public class UnidadRepoImpl implements IUnidadRepo {
     @Override
     public boolean existeNumeroEnEdificio(String numero, Integer edificioId) {
         TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(u) FROM Unidad u WHERE u.numero = :numero AND u.edificio.idEdificio = :edificioId",
-            Long.class
-        );
+                "SELECT COUNT(u) FROM Unidad u WHERE u.numero = :numero AND u.edificio.idEdificio = :edificioId",
+                Long.class);
         query.setParameter("numero", numero);
         query.setParameter("edificioId", edificioId);
         return query.getSingleResult() > 0;
+    }
+
+    @Override
+    public List<Unidad> listarPorEdificio(Long idEdificio) {
+        TypedQuery<Unidad> query = this.entityManager.createQuery(
+                "SELECT u FROM Unidad u WHERE u.edificio.idEdificio = :idEdificio",
+                Unidad.class);
+        query.setParameter("idEdificio", idEdificio);
+        return query.getResultList();
     }
 }

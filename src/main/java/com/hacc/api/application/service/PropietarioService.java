@@ -1,5 +1,7 @@
 package com.hacc.api.application.service;
 
+import java.util.Optional;
+
 import com.hacc.api.domain.model.Propietario;
 import com.hacc.api.domain.repository.IPropietarioRepo;
 
@@ -10,7 +12,7 @@ import jakarta.inject.Inject;
 public class PropietarioService {
     @Inject
     private IPropietarioRepo propietarioRepo;
-    
+
     public Propietario registrarPropietario(Propietario dto) {
         if (propietarioRepo.existePorEmail(dto.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
@@ -18,11 +20,11 @@ public class PropietarioService {
         if (propietarioRepo.existePorCedula(dto.getCedula())) {
             throw new RuntimeException("La cédula ya está registrada");
         }
-        
+
         propietarioRepo.crearPropietario(dto);
         return dto;
     }
-    
+
     public void crear(Propietario propietario) {
         propietarioRepo.crearPropietario(propietario);
     }
@@ -40,27 +42,27 @@ public class PropietarioService {
         if (propietarioExistente == null) {
             throw new RuntimeException("Propietario no encontrado");
         }
-        
-        if (!propietarioExistente.getEmail().equals(dto.getEmail()) 
+
+        if (!propietarioExistente.getEmail().equals(dto.getEmail())
                 && propietarioRepo.existePorEmail(dto.getEmail())) {
             throw new RuntimeException("El email ya está registrado por otro propietario");
         }
-        
-        if (!propietarioExistente.getCedula().equals(dto.getCedula()) 
+
+        if (!propietarioExistente.getCedula().equals(dto.getCedula())
                 && propietarioRepo.existePorCedula(dto.getCedula())) {
             throw new RuntimeException("La cédula ya está registrada por otro propietario");
         }
-        
+
         propietarioExistente.setNombre(dto.getNombre());
         propietarioExistente.setApellido(dto.getApellido());
         propietarioExistente.setTelefono(dto.getTelefono());
         propietarioExistente.setEmail(dto.getEmail());
         propietarioExistente.setCedula(dto.getCedula());
-        
+
         if (dto.getContrasena() != null && !dto.getContrasena().isEmpty()) {
             propietarioExistente.setContrasena(dto.getContrasena());
         }
-        
+
         propietarioRepo.actualizarPropietario(propietarioExistente);
     }
 
@@ -71,8 +73,22 @@ public class PropietarioService {
         }
         propietarioRepo.eliminarPropietario(id_propietario);
     }
-    
+
     public java.util.List<Propietario> listar() {
         return propietarioRepo.listarPropietarios();
+    }
+
+    /**
+     * Busca un propietario por su email
+     * 
+     * @param email Email del propietario
+     * @return Optional con el propietario si existe
+     */
+    public Optional<Propietario> buscarPorEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return propietarioRepo.buscarPorEmail(email);
     }
 }

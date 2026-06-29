@@ -9,12 +9,13 @@ import com.hacc.api.domain.repository.IPropietarioRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 @Transactional
-public class PropietarioImpl implements IPropietarioRepo{
+public class PropietarioImpl implements IPropietarioRepo {
     @Inject
     private EntityManager em;
 
@@ -49,8 +50,7 @@ public class PropietarioImpl implements IPropietarioRepo{
     @Override
     public boolean existePorEmail(String email) {
         TypedQuery<Long> query = em.createQuery(
-            "SELECT COUNT(p) FROM Propietario p WHERE p.email = :email", Long.class
-        );
+                "SELECT COUNT(p) FROM Propietario p WHERE p.email = :email", Long.class);
         query.setParameter("email", email);
         Long count = query.getSingleResult();
         return count > 0;
@@ -59,12 +59,12 @@ public class PropietarioImpl implements IPropietarioRepo{
     @Override
     public boolean existePorCedula(String cedula) {
         TypedQuery<Long> query = em.createQuery(
-            "SELECT COUNT(p) FROM Propietario p WHERE p.cedula = :cedula", Long.class
-        );
+                "SELECT COUNT(p) FROM Propietario p WHERE p.cedula = :cedula", Long.class);
         query.setParameter("cedula", cedula);
         Long count = query.getSingleResult();
         return count > 0;
     }
+
     @Override
     public Optional<Propietario> buscarPorId(Integer id) {
         Propietario propietario = em.find(Propietario.class, id);
@@ -80,5 +80,14 @@ public class PropietarioImpl implements IPropietarioRepo{
     @Override
     public void actualizar(Propietario propietario) {
         em.merge(propietario);
+    }
+
+    @Override
+    public Optional<Propietario> buscarPorEmail(String email) {
+        TypedQuery<Propietario> query = this.em.createQuery(
+                "SELECT p FROM Propietario p WHERE p.email = :email",
+                Propietario.class);
+        query.setParameter("email", email);
+        return query.getResultStream().findFirst();
     }
 }

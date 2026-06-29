@@ -12,4 +12,5 @@ public interface IUnidadRepo {
     List<Unidad> listarUnidadesPorEdificio(Integer edificioId);
     List<Unidad> listarUnidadesPorPropietario(Integer propietarioId);
     boolean existeNumeroEnEdificio(String numero, Integer edificioId);
+    List<Unidad> listarPorEdificio(Long idEdificio);
 }

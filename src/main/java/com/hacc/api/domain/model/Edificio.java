@@ -3,6 +3,8 @@ package com.hacc.api.domain.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,11 +38,13 @@ public class Edificio {
 
     @Column(name = "edi_activo")
     private Boolean activo = true;
-
+    
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_propietario", nullable = false)
     private Propietario propietario;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "edificio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Unidad> unidades = new HashSet<>();
     

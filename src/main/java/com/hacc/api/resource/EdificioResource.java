@@ -1,15 +1,24 @@
 package com.hacc.api.resource;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.hacc.api.application.service.EdificioService;
+import com.hacc.api.application.service.PropietarioService;
 import com.hacc.api.domain.model.Edificio;
+import com.hacc.api.domain.model.Propietario;
+import com.hacc.api.domain.model.Unidad;
+
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+
+import java.util.List;
+import java.util.Set;
 
 @Path("/edificios")
 @Produces(MediaType.APPLICATION_JSON)
@@ -17,214 +26,266 @@ import jakarta.ws.rs.core.Response;
 public class EdificioResource {
 
     @Inject
-    private EdificioService edificioService;
+    EdificioService edificioService;
 
+    @Inject
+    PropietarioService propietarioService;
+
+    // ==================== ENDPOINTS PÚBLICOS (ADMIN) ====================
+
+    /**
+     * Listar todos los edificios (solo administradores)
+     * GET /edificios
+     */
+    @GET
+    public Response listarTodos() {
+        return Response.ok(edificioService.listarTodos()).build();
+    }
+
+    /**
+     * Listar edificios de un propietario específico (admin)
+     * GET /edificios/propietario/{idPropietario}
+     */
+    @GET
+    @Path("/propietario/{idPropietario}")
+    public Response listarPorPropietario(@PathParam("idPropietario") Integer idPropietario) {
+        return Response.ok(edificioService.listarPorPropietario(idPropietario)).build();
+    }
+
+    /**
+     * Obtener un edificio por ID
+     * GET /edificios/{idEdificio}
+     */
+    @GET
+    @Path("/{idEdificio}")
+    public Response obtenerPorId(
+            @PathParam("idEdificio") Long idEdificio,
+            @Context SecurityContext securityContext) {
+        
+        // Si es ADMIN, puede ver cualquier edificio
+        if (securityContext.isUserInRole("ADMIN")) {
+            return Response.ok(edificioService.obtener(idEdificio)).build();
+        }
+        
+        // Si es PROPIETARIO, verificar que le pertenezca
+        String email = securityContext.getUserPrincipal().getName();
+        Propietario propietario = propietarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+        
+        Edificio edificio = edificioService.obtenerEdificioSeguro(idEdificio, propietario.getId_propietario());
+        return Response.ok(edificio).build();
+    }
+
+    // ==================== ENDPOINTS PARA PROPIETARIOS (FRONTEND) ====================
+
+    /**
+     * Obtener todos los edificios del propietario autenticado
+     * GET /edificios/mi-perfil/edificios
+     */
+    @GET
+    @Path("/mi-perfil/edificios")
+    public Response obtenerMisEdificios(@Context SecurityContext securityContext) {
+        String email = securityContext.getUserPrincipal().getName();
+        List<Edificio> edificios = edificioService.obtenerEdificiosPorEmailPropietario(email);
+        return Response.ok(edificios).build();
+    }
+
+    /**
+     * Obtener edificios activos del propietario autenticado
+     * GET /edificios/mi-perfil/edificios/activos
+     */
+    @GET
+    @Path("/mi-perfil/edificios/activos")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response obtenerMisEdificiosActivos(@Context SecurityContext securityContext) {
+        String email = securityContext.getUserPrincipal().getName();
+        Propietario propietario = propietarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+        
+        List<Edificio> edificios = edificioService.obtenerEdificiosActivos(propietario.getId_propietario());
+        return Response.ok(edificios).build();
+    }
+
+    /**
+     * Obtener unidades de un edificio del propietario autenticado
+     * GET /edificios/mi-perfil/edificios/{idEdificio}/unidades
+     */
+    @GET
+    @Path("/mi-perfil/edificios/{idEdificio}/unidades")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response obtenerMisUnidades(
+            @PathParam("idEdificio") Long idEdificio,
+            @Context SecurityContext securityContext) {
+        
+        String email = securityContext.getUserPrincipal().getName();
+        Propietario propietario = propietarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+        
+        Set<Unidad> unidades = edificioService.obtenerUnidadesDeEdificio(idEdificio, propietario.getId_propietario());
+        return Response.ok(unidades).build();
+    }
+
+    /**
+     * Obtener resumen de edificios del propietario autenticado
+     * GET /edificios/mi-perfil/resumen
+     */
+    @GET
+    @Path("/mi-perfil/resumen")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response obtenerResumenMisEdificios(@Context SecurityContext securityContext) {
+        String email = securityContext.getUserPrincipal().getName();
+        Propietario propietario = propietarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+        
+        EdificioService.ResumenEdificiosDTO resumen = edificioService.obtenerResumenEdificios(
+                propietario.getId_propietario()
+        );
+        return Response.ok(resumen).build();
+    }
+
+    /**
+     * Obtener dashboard de edificios del propietario autenticado
+     * GET /edificios/mi-perfil/dashboard
+     */
+    @GET
+    @Path("/mi-perfil/dashboard")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response obtenerDashboardMisEdificios(@Context SecurityContext securityContext) {
+        String email = securityContext.getUserPrincipal().getName();
+        Propietario propietario = propietarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+        
+        EdificioService.DashboardEdificiosDTO dashboard = edificioService.obtenerDashboardEdificios(
+                propietario.getId_propietario()
+        );
+        return Response.ok(dashboard).build();
+    }
+
+    // ==================== CRUD PARA PROPIETARIOS ====================
+
+    /**
+     * Crear un nuevo edificio
+     * POST /edificios
+     */
     @POST
-    @Path("/registro/{propietarioId}")
-    public Response registrarEdificio(@PathParam("propietarioId") Integer propietarioId, Edificio edificio) {
-        try {
-            if (propietarioId == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del propietario es obligatorio"))
-                    .build();
-            }
-
-            if (edificio == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Los datos del edificio son obligatorios"))
-                    .build();
-            }
-
-            Edificio nuevoEdificio = edificioService.registrarEdificio(edificio, propietarioId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("mensaje", "Edificio registrado exitosamente");
-            response.put("id", nuevoEdificio.getIdEdificio());
-            response.put("nombre", nuevoEdificio.getNombre());
-            response.put("propietarioId", propietarioId);
-
-            return Response.status(Response.Status.CREATED).entity(response).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al registrar edificio: " + e.getMessage()))
-                .build();
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response crearEdificio(
+            @QueryParam("idPropietario") Integer idPropietario,
+            Edificio edificio,
+            @Context SecurityContext securityContext) {
+        
+        // Si es PROPIETARIO, usar su ID automáticamente
+        if (!securityContext.isUserInRole("ADMIN")) {
+            String email = securityContext.getUserPrincipal().getName();
+            Propietario propietario = propietarioService.buscarPorEmail(email)
+                    .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+            idPropietario = propietario.getId_propietario();
         }
+        
+        if (idPropietario == null) {
+            throw new BadRequestException("idPropietario es obligatorio");
+        }
+        
+        Edificio nuevo = edificioService.registrarEdificio(edificio, idPropietario);
+        return Response.status(Response.Status.CREATED).entity(nuevo).build();
     }
 
+    /**
+     * Crear un edificio con unidades
+     * POST /edificios/con-unidades
+     */
     @POST
-    @Path("/registro-con-unidades/{propietarioId}")
-    public Response registrarEdificioConUnidades(@PathParam("propietarioId") Integer propietarioId, Edificio edificio) {
-        try {
-            if (propietarioId == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del propietario es obligatorio"))
-                    .build();
-            }
-
-            if (edificio == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Los datos del edificio son obligatorios"))
-                    .build();
-            }
-
-            Edificio nuevoEdificio = edificioService.registrarEdificioConUnidades(edificio, propietarioId, null);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("mensaje", "Edificio registrado exitosamente");
-            response.put("id", nuevoEdificio.getIdEdificio());
-            response.put("nombre", nuevoEdificio.getNombre());
-            response.put("totalUnidades", nuevoEdificio.getUnidades().size());
-            response.put("propietarioId", propietarioId);
-
-            return Response.status(Response.Status.CREATED).entity(response).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al registrar edificio: " + e.getMessage()))
-                .build();
+    @Path("/con-unidades")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response crearEdificioConUnidades(
+            @QueryParam("idPropietario") Integer idPropietario,
+            CrearEdificioConUnidadesRequest request,
+            @Context SecurityContext securityContext) {
+        
+        // Si es PROPIETARIO, usar su ID automáticamente
+        if (!securityContext.isUserInRole("ADMIN")) {
+            String email = securityContext.getUserPrincipal().getName();
+            Propietario propietario = propietarioService.buscarPorEmail(email)
+                    .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+            idPropietario = propietario.getId_propietario();
         }
+        
+        if (idPropietario == null) {
+            throw new BadRequestException("idPropietario es obligatorio");
+        }
+        
+        Edificio nuevo = edificioService.registrarEdificioConUnidades(
+                request.getEdificio(),
+                idPropietario,
+                request.getUnidades()
+        );
+        return Response.status(Response.Status.CREATED).entity(nuevo).build();
     }
 
-    @GET
-    @Path("/propietario/{propietarioId}")
-    public Response listarEdificiosPorPropietario(@PathParam("propietarioId") Integer propietarioId) {
-        try {
-            if (propietarioId == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del propietario es obligatorio"))
-                    .build();
-            }
-
-            List<Edificio> edificios = edificioService.listarPorPropietario(propietarioId);
+    /**
+     * Actualizar un edificio
+     * PATCH /edificios/{idEdificio}
+     */
+    @PATCH
+    @Path("/{idEdificio}")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response actualizarEdificio(
+            @PathParam("idEdificio") Long idEdificio,
+            Edificio edificio,
+            @Context SecurityContext securityContext) {
+        
+        // Verificar que el propietario tenga acceso
+        if (!securityContext.isUserInRole("ADMIN")) {
+            String email = securityContext.getUserPrincipal().getName();
+            Propietario propietario = propietarioService.buscarPorEmail(email)
+                    .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
             
-            Map<String, Object> response = new HashMap<>();
-            response.put("propietarioId", propietarioId);
-            response.put("total", edificios.size());
-            response.put("edificios", edificios);
-
-            return Response.ok(response).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al listar edificios: " + e.getMessage()))
-                .build();
-        }
-    }
-
-    @GET
-    @Path("/{id}")
-    public Response obtenerEdificio(@PathParam("id") Integer id) {
-        try {
-            if (id == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del edificio es obligatorio"))
-                    .build();
+            // Verificar pertenencia
+            if (!edificioService.verificarPertenencia(idEdificio, propietario.getId_propietario())) {
+                throw new ForbiddenException("No tienes permiso para modificar este edificio");
             }
-
-            Edificio edificio = edificioService.obtener(id);
-            return Response.ok(edificio).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al obtener edificio: " + e.getMessage()))
-                .build();
         }
+        
+        Edificio actualizado = edificioService.actualizar(idEdificio, edificio);
+        return Response.ok(actualizado).build();
     }
 
-    @GET
-    public Response listarEdificios() {
-        try {
-            List<Edificio> edificios = edificioService.listarTodos();
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("total", edificios.size());
-            response.put("edificios", edificios);
-
-            return Response.ok(response).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al listar edificios: " + e.getMessage()))
-                .build();
-        }
-    }
-
-    @PUT
-    @Path("/{id}")
-    public Response actualizarEdificio(@PathParam("id") Integer id, Edificio edificio) {
-        try {
-            if (id == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del edificio es obligatorio"))
-                    .build();
-            }
-
-            if (edificio == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Los datos del edificio son obligatorios"))
-                    .build();
-            }
-
-            Edificio edificioActualizado = edificioService.actualizar(id, edificio);
-
-            return Response.ok(Map.of(
-                "mensaje", "Edificio actualizado exitosamente",
-                "id", edificioActualizado.getIdEdificio()
-            )).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al actualizar edificio: " + e.getMessage()))
-                .build();
-        }
-    }
-
+    /**
+     * Eliminar un edificio (solo si no tiene unidades)
+     * DELETE /edificios/{idEdificio}
+     */
     @DELETE
-    @Path("/{id}")
-    public Response eliminarEdificio(@PathParam("id") Integer id) {
-        try {
-            if (id == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "El ID del edificio es obligatorio"))
-                    .build();
+    @Path("/{idEdificio}")
+    @RolesAllowed({"PROPIETARIO", "ADMIN"})
+    public Response eliminarEdificio(
+            @PathParam("idEdificio") Long idEdificio,
+            @Context SecurityContext securityContext) {
+        
+        // Verificar que el propietario tenga acceso
+        if (!securityContext.isUserInRole("ADMIN")) {
+            String email = securityContext.getUserPrincipal().getName();
+            Propietario propietario = propietarioService.buscarPorEmail(email)
+                    .orElseThrow(() -> new NotFoundException("Propietario no encontrado"));
+            
+            // Verificar pertenencia
+            if (!edificioService.verificarPertenencia(idEdificio, propietario.getId_propietario())) {
+                throw new ForbiddenException("No tienes permiso para eliminar este edificio");
             }
-
-            edificioService.eliminar(id);
-
-            return Response.ok(Map.of(
-                "mensaje", "Edificio eliminado exitosamente",
-                "id", id
-            )).build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity(Map.of("error", e.getMessage()))
-                .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(Map.of("error", "Error al eliminar edificio: " + e.getMessage()))
-                .build();
         }
+        
+        edificioService.eliminar(idEdificio);
+        return Response.noContent().build();
+    }
+
+    // ==================== DTO INTERNO ====================
+
+    public static class CrearEdificioConUnidadesRequest {
+        private Edificio edificio;
+        private List<Unidad> unidades;
+
+        public Edificio getEdificio() { return edificio; }
+        public void setEdificio(Edificio edificio) { this.edificio = edificio; }
+        public List<Unidad> getUnidades() { return unidades; }
+        public void setUnidades(List<Unidad> unidades) { this.unidades = unidades; }
     }
 }

@@ -9,7 +9,10 @@ import com.hacc.api.domain.repository.IUnidadRepo;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class UnidadService {
@@ -25,20 +28,21 @@ public class UnidadService {
 
     @Transactional
     public Unidad registrarUnidad(Unidad unidad, Integer edificioId, Integer propietarioId) {
-        Edificio edificio = edificioRepo.obtenerEdificio(edificioId);
-        if (edificio == null) {
-            throw new RuntimeException("Edificio no encontrado con ID: " + edificioId);
-        }
+        Edificio edificio = edificioRepo.buscarPorId(edificioId.longValue())
+                .orElseThrow(() -> new RuntimeException("Edificio no encontrado con ID: " + edificioId));
+
         Propietario propietario = propietarioRepo.obtenerPropietario(propietarioId);
         if (propietario == null) {
             throw new RuntimeException("Propietario no encontrado con ID: " + propietarioId);
         }
+
         if (unidad.getNumero() == null || unidad.getNumero().trim().isEmpty()) {
             throw new RuntimeException("El número de la unidad es obligatorio");
         }
+
         if (unidadRepo.existeNumeroEnEdificio(unidad.getNumero(), edificioId)) {
-            throw new RuntimeException("Ya existe una unidad con el número '" + unidad.getNumero() + 
-                                     "' en este edificio");
+            throw new RuntimeException("Ya existe una unidad con el número '" + unidad.getNumero() +
+                    "' en este edificio");
         }
         unidad.setEdificio(edificio);
         unidad.setPropietario(propietario);
@@ -48,9 +52,11 @@ public class UnidadService {
 
         return unidad;
     }
+
     @Transactional
     public List<Unidad> registrarMultiplesUnidades(List<Unidad> unidades, Integer edificioId, Integer propietarioId) {
-        Edificio edificio = edificioRepo.obtenerEdificio(edificioId);
+           Edificio edificio = edificioRepo.buscarPorId(edificioId.longValue())
+                .orElseThrow(() -> new RuntimeException("Edificio no encontrado con ID: " + edificioId));
         if (edificio == null) {
             throw new RuntimeException("Edificio no encontrado con ID: " + edificioId);
         }
@@ -63,8 +69,8 @@ public class UnidadService {
                 throw new RuntimeException("El número de la unidad es obligatorio para todas las unidades");
             }
             if (unidadRepo.existeNumeroEnEdificio(unidad.getNumero(), edificioId)) {
-                throw new RuntimeException("Ya existe una unidad con el número '" + unidad.getNumero() + 
-                                         "' en este edificio");
+                throw new RuntimeException("Ya existe una unidad con el número '" + unidad.getNumero() +
+                        "' en este edificio");
             }
             unidad.setEdificio(edificio);
             unidad.setPropietario(propietario);
@@ -85,10 +91,8 @@ public class UnidadService {
     }
 
     public List<Unidad> listarPorEdificio(Integer edificioId) {
-        Edificio edificio = edificioRepo.obtenerEdificio(edificioId);
-        if (edificio == null) {
-            throw new RuntimeException("Edificio no encontrado con ID: " + edificioId);
-        }
+        Edificio edificio = edificioRepo.buscarPorId(edificioId.longValue())
+                .orElseThrow(() -> new NotFoundException("Edificio no encontrado con ID: " + edificioId));
         return unidadRepo.listarUnidadesPorEdificio(edificioId);
     }
 
@@ -99,7 +103,7 @@ public class UnidadService {
         }
         return unidadRepo.listarUnidadesPorPropietario(propietarioId);
     }
-    
+
     @Transactional
     public void eliminar(Integer id) {
         Unidad unidad = unidadRepo.obtenerUnidad(id);
@@ -107,11 +111,11 @@ public class UnidadService {
             throw new RuntimeException("Unidad no encontrada con ID: " + id);
         }
         if (unidad.getResidentes() != null && !unidad.getResidentes().isEmpty()) {
-            throw new RuntimeException("No se puede eliminar la unidad porque tiene " + 
-                                     unidad.getResidentes().size() + " residentes asociados");
+            throw new RuntimeException("No se puede eliminar la unidad porque tiene " +
+                    unidad.getResidentes().size() + " residentes asociados");
         }
         Edificio edificio = unidad.getEdificio();
-        
+
         unidadRepo.eliminarUnidad(id);
         if (edificio != null) {
             edificio.setTotalUnidades(edificio.getUnidades().size());
