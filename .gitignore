@@ -1,0 +1,21 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+.idea/
+*.iml
+.vscode/
+.DS_Store
+.env
+.env.local
+.recommenders/
+.factorypath
+.mvn/wrapper/maven-wrapper.jar
+!mvnw
+!mvnw.cmd
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Outputs
+reporte.pdf
+*.log
