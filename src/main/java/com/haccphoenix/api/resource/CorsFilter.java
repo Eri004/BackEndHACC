@@ -2,7 +2,9 @@ package com.haccphoenix.api.resource;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,21 +26,23 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
         "https://front-end-hacc.vercel.app"
     );
 
-    @ConfigProperty(name = "app.cors.allowed-origins", defaultValue = "")
-    String extraAllowedOrigins;
+    @ConfigProperty(name = "app.cors.allowed-origins")
+    Optional<String> extraAllowedOrigins;
 
     private volatile Set<String> allowedOrigins;
 
     private Set<String> allowedOrigins() {
         if (allowedOrigins == null) {
-            Set<String> set = DEFAULT_ALLOWED_ORIGINS.stream().collect(Collectors.toUnmodifiableSet());
-            if (extraAllowedOrigins != null && !extraAllowedOrigins.isBlank()) {
-                set = Arrays.stream(extraAllowedOrigins.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toUnmodifiableSet());
-            }
-            allowedOrigins = set;
+            Set<String> set = new HashSet<>(DEFAULT_ALLOWED_ORIGINS);
+            extraAllowedOrigins.ifPresent(value -> {
+                if (!value.isBlank()) {
+                    Arrays.stream(value.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .forEach(set::add);
+                }
+            });
+            allowedOrigins = Set.copyOf(set);
         }
         return allowedOrigins;
     }
