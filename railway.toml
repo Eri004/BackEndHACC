@@ -8,5 +8,5 @@ healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 
-[nixpacks]
-jdk = "21"
+[phases.setup]
+nixPkgs = ["openjdk21", "maven"]
