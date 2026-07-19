@@ -36,6 +36,9 @@ public class Edificio extends PanacheEntityBase {
     @Column(name = "estado", length = 20)
     private String estado = "ACTIVO";
 
+    @Column(name = "imagen", columnDefinition = "TEXT")
+    private String imagen;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -72,6 +75,9 @@ public class Edificio extends PanacheEntityBase {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getImagen() { return imagen; }
+    public void setImagen(String imagen) { this.imagen = imagen; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

@@ -53,6 +53,7 @@ public class EdificioService {
         existente.setNumeroPisos(dto.getNumeroPisos());
         existente.setDescripcion(dto.getDescripcion());
         existente.setEstado(dto.getEstado());
+        existente.setImagen(dto.getImagen());
 
         edificioRepository.persist(existente);
         return existente;
