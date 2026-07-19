@@ -2,10 +2,12 @@ package com.haccphoenix.api.application.service;
 
 import com.haccphoenix.api.domain.model.Cargo;
 import com.haccphoenix.api.domain.model.Departamento;
+import com.haccphoenix.api.domain.model.PagoCargo;
 import com.haccphoenix.api.domain.model.TipoCargo;
 import com.haccphoenix.api.domain.model.Usuario;
 import com.haccphoenix.api.domain.repository.CargoRepository;
 import com.haccphoenix.api.domain.repository.DepartamentoRepository;
+import com.haccphoenix.api.domain.repository.PagoCargoRepository;
 import com.haccphoenix.api.domain.repository.TipoCargoRepository;
 import com.haccphoenix.api.domain.repository.UsuarioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,6 +30,9 @@ public class CargoService {
 
     @Inject
     UsuarioRepository usuarioRepository;
+
+    @Inject
+    PagoCargoRepository pagoCargoRepository;
 
     @Transactional
     public Cargo registrar(Cargo cargo, Integer departamentoId, Integer tipoCargoId, Integer usuarioId) {
@@ -102,6 +107,11 @@ public class CargoService {
     @Transactional
     public void eliminar(Integer id) {
         Cargo cargo = obtener(id);
+        List<PagoCargo> relaciones = pagoCargoRepository.listarPorCargo(id);
+        for (PagoCargo pc : relaciones) {
+            pagoCargoRepository.delete(pc);
+        }
+        pagoCargoRepository.flush();
         cargoRepository.delete(cargo);
     }
 
