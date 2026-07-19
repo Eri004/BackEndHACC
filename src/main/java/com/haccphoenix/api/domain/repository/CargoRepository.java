@@ -25,4 +25,9 @@ public class CargoRepository implements PanacheRepositoryBase<Cargo, Integer> {
     public List<Cargo> listarPorPeriodo(LocalDate inicio, LocalDate fin) {
         return list("fechaGeneracion BETWEEN ?1 AND ?2 ORDER BY fechaGeneracion DESC", inicio, fin);
     }
+
+    public List<Cargo> listarPorPeriodoYEdificios(LocalDate inicio, LocalDate fin, java.util.List<Integer> edificioIds) {
+        return list("departamento.edificio.id IN ?1 AND fechaGeneracion BETWEEN ?2 AND ?3 ORDER BY fechaGeneracion DESC",
+                edificioIds, inicio, fin);
+    }
 }
