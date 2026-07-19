@@ -20,4 +20,9 @@ public class PagoRepository implements PanacheRepositoryBase<Pago, Integer> {
     public List<Pago> listarPorPeriodo(LocalDate inicio, LocalDate fin) {
         return list("fecha BETWEEN ?1 AND ?2 ORDER BY fecha DESC", inicio, fin);
     }
+
+    public List<Pago> listarPorPeriodoYEdificio(LocalDate inicio, LocalDate fin, Integer edificioId) {
+        return list("departamento.edificio.id = ?1 AND fecha BETWEEN ?2 AND ?3 ORDER BY fecha DESC",
+                edificioId, inicio, fin);
+    }
 }
